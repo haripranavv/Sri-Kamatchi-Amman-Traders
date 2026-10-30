@@ -14,6 +14,7 @@ import {
   getCurrentUser,
   getCurrentUserProfile,
   initAuthObserver,
+  onAuthChange,
   signInWithGoogle,
   signOut,
   isCurrentUserAdmin
@@ -26,7 +27,8 @@ import {
   deleteProduct,
   toggleProductStatus,
   getOrders,
-  updateOrderStatus
+  updateOrderStatus,
+  verifyOrderIntegrity
 } from './firestore.js';
 
 import { formatPrice, sanitizeHTML, showToast, $, $$ } from './utils.js';
@@ -156,6 +158,10 @@ async function verifyAndRenderAdmin() {
   const profile = getCurrentUserProfile();
 
   if (!user) {
+    if (unsubscribeProducts) {
+      unsubscribeProducts();
+      unsubscribeProducts = null;
+    }
     showAdminScreen('unauth');
     adminUserMenu?.classList.add('hidden');
     return;
@@ -165,6 +171,10 @@ async function verifyAndRenderAdmin() {
   const hasAdminPrivileges = await isCurrentUserAdmin();
 
   if (!hasAdminPrivileges) {
+    if (unsubscribeProducts) {
+      unsubscribeProducts();
+      unsubscribeProducts = null;
+    }
     // Show Access Restricted screen with user context
     if (unauthUserEmail) unauthUserEmail.textContent = user.email || 'your account';
     if (unauthUserUid) unauthUserUid.textContent = user.uid;
@@ -351,8 +361,8 @@ function renderProductsTable() {
   productsTableBody.innerHTML = filteredProducts.map(p => {
     const hasImage = p.imageURL || (p.imageURLs && p.imageURLs[0]);
     const thumbHTML = hasImage
-      ? `<img src="${sanitizeHTML(hasImage)}" class="product-thumb" alt="${sanitizeHTML(p.name)}" onerror="this.onerror=null; this.src='assets/images/placeholders/product-placeholder.webp';" />`
-      : `<img src="assets/images/placeholders/product-placeholder.webp" class="product-thumb" alt="${sanitizeHTML(p.name)}" />`;
+      ? `<img src="${sanitizeHTML(hasImage)}" class="product-thumb" alt="${sanitizeHTML(p.name)}" width="48" height="48" loading="lazy" onerror="this.onerror=null; this.src='assets/images/placeholders/product-placeholder.webp';" />`
+      : `<img src="assets/images/placeholders/product-placeholder.webp" class="product-thumb" alt="${sanitizeHTML(p.name)}" width="48" height="48" loading="lazy" />`;
 
     // Variants display
     const variants = p.variants || [];
@@ -843,17 +853,39 @@ async function loadRealOrders() {
         ? ord.createdAt.toDate().toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
         : 'Recent';
 
-      const itemsSummary = (ord.items || []).map(i => `${sanitizeHTML(i.name)} (${i.size || '1L'}) × ${i.quantity}`).join(', ');
+      const customerDisplayName = ord.customerName || ord.userName || 'Customer';
+      const customerContactParts = [
+        sanitizeHTML(customerDisplayName),
+        ord.phone ? `<a href="tel:${sanitizeHTML(ord.phone)}" style="color:inherit; font-weight:600; text-decoration:underline;">${sanitizeHTML(ord.phone)}</a>` : null,
+        ord.userEmail ? `<span class="text-xs text-muted">(${sanitizeHTML(ord.userEmail)})</span>` : null
+      ].filter(Boolean);
+      const customerContact = customerContactParts.join(' • ');
+
+      const addr = ord.deliveryAddress || {};
+      const addressParts = [
+        addr.addressLine1,
+        addr.addressLine2,
+        addr.city,
+        addr.state,
+        addr.pincode
+      ].filter(Boolean).map(sanitizeHTML);
+      const fullAddress = addressParts.join(', ');
+
+      const itemsSummary = (ord.items || []).map(i => `${sanitizeHTML(i.name || 'Oil')} (${sanitizeHTML(i.size || '1L')}) × ${Number(i.quantity) || 1}`).join(', ');
+
+      // Audit order prices and totals against active catalog
+      const integrity = verifyOrderIntegrity(ord, allProducts);
 
       return `
         <div class="order-card" data-order-id="${ord.id}">
           <div class="order-card__header">
             <div>
               <span class="order-card__id">Order #${ord.id.slice(0, 8)}</span>
+              ${ord.inventoryDeducted === true ? '<span class="product-card__badge product-card__badge--cold-pressed" style="margin-left: 8px;">Inventory Deducted</span>' : ''}
               <span class="text-xs text-muted" style="margin-left: 12px;">${orderDate}</span>
             </div>
             <div>
-              <select class="admin-select order-status-select" data-order-id="${ord.id}" style="font-size: var(--text-xs); padding: 4px 8px; min-height: auto;">
+              <select class="admin-select order-status-select" data-order-id="${ord.id}" data-current-status="${ord.status}" style="font-size: var(--text-xs); padding: 4px 8px; min-height: auto;">
                 <option value="placed" ${ord.status === 'placed' ? 'selected' : ''}>Placed</option>
                 <option value="confirmed" ${ord.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
                 <option value="shipped" ${ord.status === 'shipped' ? 'selected' : ''}>Shipped</option>
@@ -864,29 +896,80 @@ async function loadRealOrders() {
           </div>
 
           <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4);">
-            <div>
-              <p class="text-sm"><strong>Customer:</strong> ${sanitizeHTML(ord.userEmail || ord.userName || 'Customer')}</p>
+            <div style="max-width: 65%;">
+              <p class="text-sm"><strong>Customer:</strong> ${customerContact}</p>
+              ${fullAddress ? `<p class="text-xs text-secondary" style="margin-top: 2px;"><strong>Address:</strong> ${fullAddress}</p>` : ''}
               <p class="text-xs text-secondary" style="margin-top: 4px;"><strong>Items:</strong> ${itemsSummary || '—'}</p>
+              ${ord.notes ? `<p class="text-xs text-muted" style="margin-top: 2px;"><em>Note: ${sanitizeHTML(ord.notes)}</em></p>` : ''}
             </div>
             <div style="text-align: right;">
               <span class="text-sm font-semibold">Total: ${formatPrice(ord.total || ord.subtotal || 0)}</span>
-              <div class="text-xs text-muted">${ord.paymentStatus ? `Payment: ${ord.paymentStatus}` : ''}</div>
+              <div class="text-xs text-muted">${ord.paymentStatus ? `Payment: ${ord.paymentStatus}` : 'COD'}</div>
+              <div class="text-xs text-muted" style="text-transform: capitalize;">${sanitizeHTML((ord.paymentMethod || 'cash_on_delivery').replace(/_/g, ' '))}</div>
             </div>
           </div>
+
+          <!-- Order Price Integrity & Discrepancy Indicator -->
+          ${!integrity.isValid ? `
+            <div class="order-integrity-alert" style="background: #fef2f2; border: 1px solid #f87171; border-radius: var(--radius-md); padding: 8px 12px; margin-top: var(--space-3);">
+              <div style="font-weight: 700; color: #991b1b; font-size: var(--text-xs);">
+                ⚠️ Price Verification Warning (Direct Submission Discrepancy)
+              </div>
+              <div style="font-size: var(--text-xs); color: #7f1d1d; margin-top: 2px;">
+                Submitted Total: ${formatPrice(ord.total || 0)} | Expected Catalog Total: ${formatPrice(integrity.expectedTotal)}
+              </div>
+              <ul style="margin: 4px 0 0 16px; font-size: 11px; color: #991b1b;">
+                ${integrity.issues.map(iss => `<li>${sanitizeHTML(iss)}</li>`).join('')}
+              </ul>
+            </div>
+          ` : `
+            <div style="font-size: 11px; color: var(--color-success); font-weight: 600; margin-top: var(--space-2);">
+              ✓ Prices and totals verified against current catalog
+            </div>
+          `}
         </div>
       `;
     }).join('');
 
-    // Wire up order status changes
+    // Wire up order status changes with atomic inventory handling
     ordersListContainer.querySelectorAll('.order-status-select').forEach(sel => {
       sel.addEventListener('change', async (e) => {
         const orderId = sel.getAttribute('data-order-id');
+        const prevStatus = sel.getAttribute('data-current-status') || 'placed';
         const newStatus = e.target.value;
+        const targetOrder = orders.find(o => o.id === orderId);
+
+        // If confirming an order with price discrepancies, warn the administrator
+        if (newStatus === 'confirmed' && targetOrder) {
+          const integrity = verifyOrderIntegrity(targetOrder, allProducts);
+          if (!integrity.isValid) {
+            const confirmedProceed = window.confirm(
+              `PRICE VERIFICATION WARNING for Order #${orderId.slice(0, 8)}:\n\n` +
+              integrity.issues.join('\n') +
+              `\n\nSubmitted Total: ₹${targetOrder.total} vs Expected Catalog Total: ₹${integrity.expectedTotal}.\n\n` +
+              `Do you still want to confirm this order and deduct inventory stock?`
+            );
+            if (!confirmedProceed) {
+              sel.value = prevStatus;
+              return;
+            }
+          }
+        }
+
         try {
+          sel.disabled = true;
           await updateOrderStatus(orderId, newStatus);
-          showToast(`Order status updated to "${newStatus}".`, 'success');
+          sel.setAttribute('data-current-status', newStatus);
+          showToast(`Order #${orderId.slice(0, 8)} updated to "${newStatus}".`, 'success');
+          // Refresh orders and overview metrics to display updated inventory
+          await loadRealOrders();
+          updateOverviewMetrics();
         } catch (err) {
-          showToast(err.message, 'error');
+          console.error('[Admin] Order status change failed:', err);
+          sel.value = prevStatus; // revert selection
+          showToast(err.message || 'Failed to update order status.', 'error', 7000);
+        } finally {
+          sel.disabled = false;
         }
       });
     });
@@ -998,8 +1081,9 @@ function setupEventListeners() {
 export function initAdminDashboard() {
   setupEventListeners();
 
-  // Initialize auth state observer
-  initAuthObserver(async () => {
+  // Initialize auth state observer once and register ongoing auth state listener
+  initAuthObserver();
+  onAuthChange(async () => {
     await verifyAndRenderAdmin();
   });
 }

@@ -4,15 +4,63 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- SEO -->
+  <!-- SEO & Open Graph -->
   <title>Sri Kamatchi Amman Traders — Premium Cold-Pressed Cooking Oils</title>
   <meta name="description" content="Premium cold-pressed cooking oils from Tamil Nadu. Sesame, coconut, groundnut, and more — crafted with tradition, delivered fresh." />
   <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://sri-kamatchi-amman-traders.web.app/" />
 
-  <!-- Open Graph -->
+  <!-- Open Graph / WhatsApp Sharing -->
   <meta property="og:title" content="Sri Kamatchi Amman Traders — Premium Cooking Oils" />
-  <meta property="og:description" content="Cold-pressed cooking oils from Tamil Nadu. Sesame, coconut, groundnut and more." />
+  <meta property="og:description" content="Traditional cold-pressed cooking oils from Tamil Nadu. Pure sesame, coconut, groundnut, and more." />
   <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/images/products/sesame-oil.webp" />
+  <meta property="og:url" content="https://sri-kamatchi-amman-traders.web.app/" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Sri Kamatchi Amman Traders — Premium Cooking Oils" />
+  <meta name="twitter:description" content="Traditional cold-pressed cooking oils from Tamil Nadu. Pure sesame, coconut, groundnut, and more." />
+  <meta name="twitter:image" content="assets/images/products/sesame-oil.webp" />
+
+  <!-- Google Fonts Preconnect & Optimization -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Structured Data: LocalBusiness / Store -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    "name": "Sri Kamatchi Amman Traders",
+    "alternateName": "ஸ்ரீ காமாட்சி அம்மன் டிரேடர்ஸ்",
+    "description": "Pure cold-pressed traditional cooking oils serving families across Tamil Nadu.",
+    "priceRange": "₹₹",
+    "address": {
+      "@type": "PostalAddress",
+      "addressRegion": "Tamil Nadu",
+      "addressCountry": "IN"
+    },
+    "currenciesAccepted": "INR",
+    "paymentAccepted": "Cash on Delivery",
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Traditional Cooking Oils",
+      "itemListElement": [
+        {
+          "@type": "OfferCatalog",
+          "name": "Cold-Pressed Oils",
+          "itemListElement": [
+            { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Pure Sesame Oil (நல்லெண்ணெய்)" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Cold-Pressed Groundnut Oil (கடலை எண்ணெய்)" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Pure Virgin Coconut Oil (தேங்காய் எண்ணெய்)" } }
+          ]
+        }
+      ]
+    }
+  }
+  </script>
 
   <!-- Favicon placeholder -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>🛢️</text></svg>" />
@@ -69,7 +117,7 @@
         <!-- Signed In: Show User Menu -->
         <div class="user-menu hidden" id="user-menu-container">
           <button class="user-menu__trigger" id="user-menu-trigger" aria-haspopup="true" aria-expanded="false">
-            <img class="avatar" src="" alt="User avatar" id="user-avatar" />
+            <img class="avatar" src="" alt="User avatar" id="user-avatar" width="36" height="36" />
           </button>
 
           <div class="user-menu__dropdown" id="user-menu-dropdown" role="menu">
@@ -82,9 +130,9 @@
             <button class="user-menu__item" id="user-menu-profile-btn" role="menuitem">
               👤 My Profile
             </button>
-            <button class="user-menu__item" role="menuitem" disabled>
+            <a href="orders.html" class="user-menu__item" id="user-menu-orders-link" role="menuitem">
               📦 My Orders
-            </button>
+            </a>
             <a href="admin.html" class="user-menu__item hidden" id="user-menu-admin-link" role="menuitem">
               ⚙️ Admin Portal
             </a>

@@ -6,10 +6,22 @@
   <meta name="description" content="Product Details — Sri Kamatchi Amman Traders authentic cold-pressed cooking oils." />
   <title>Product Details — Sri Kamatchi Amman Traders</title>
 
-  <!-- Google Fonts: Outfit (English) + Noto Sans Tamil -->
+  <!-- Google Fonts: Inter + Outfit + Noto Sans Tamil -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Open Graph / WhatsApp Social Sharing -->
+  <meta property="og:title" id="og-title" content="Product Details — Sri Kamatchi Amman Traders" />
+  <meta property="og:description" id="og-desc" content="Discover 100% pure cold-pressed cooking oils crafted with traditional stone-ground techniques." />
+  <meta property="og:type" content="product" />
+  <meta property="og:image" id="og-image" content="assets/images/placeholders/product-placeholder.webp" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" id="twitter-title" content="Product Details — Sri Kamatchi Amman Traders" />
+  <meta name="twitter:description" id="twitter-desc" content="Traditional cold-pressed cooking oils crafted with purity." />
+  <meta name="twitter:image" id="twitter-image" content="assets/images/placeholders/product-placeholder.webp" />
 
   <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>🛢️</text></svg>" />
@@ -61,7 +73,7 @@
         <!-- Signed In: Show User Menu -->
         <div class="user-menu hidden" id="user-menu-container">
           <button class="user-menu__trigger" id="user-menu-trigger" aria-haspopup="true" aria-expanded="false">
-            <img class="avatar" src="" alt="User avatar" id="user-avatar" />
+            <img class="avatar" src="" alt="User avatar" id="user-avatar" width="36" height="36" />
           </button>
 
           <div class="user-menu__dropdown" id="user-menu-dropdown" role="menu">
@@ -70,6 +82,10 @@
               <p class="user-menu__email" id="user-email"></p>
               <span class="dashboard-card__badge dashboard-card__badge--admin hidden" id="user-role-badge" style="margin-top:6px; display:inline-block;"></span>
             </div>
+
+            <a href="orders.html" class="user-menu__item" id="user-menu-orders-link" role="menuitem">
+              📦 My Orders
+            </a>
 
             <a href="admin.html" class="user-menu__item hidden" id="user-menu-admin-link" role="menuitem">
               ⚙️ Admin Portal
@@ -125,7 +141,7 @@
         <!-- Gallery Column -->
         <div class="product-gallery">
           <div class="product-gallery__main-wrap">
-            <img id="product-main-image" src="assets/images/placeholders/product-placeholder.webp" alt="Cooking Oil" class="product-gallery__main-img" />
+            <img id="product-main-image" src="assets/images/placeholders/product-placeholder.webp" alt="Cooking Oil" class="product-gallery__main-img" width="600" height="600" fetchpriority="high" />
             <div class="product-gallery__badge" id="product-badges-container">
               <!-- Badges injected here -->
             </div>
@@ -145,7 +161,9 @@
             
             <div class="product-info__ratings">
               <span class="product-info__stars" id="product-stars">★★★★★</span>
-              <span class="product-info__review-count" id="product-rating-text">4.8 (24 reviews)</span>
+              <a href="#product-reviews-section" class="product-info__review-link" style="text-decoration: none; color: inherit;">
+                <span class="product-info__review-count" id="product-rating-text">4.8 (24 reviews)</span>
+              </a>
             </div>
           </div>
 
@@ -240,6 +258,133 @@
 
       </div>
 
+      <!-- ════════════════════════════════════════════════════════ -->
+      <!-- CUSTOMER REVIEWS SECTION                                 -->
+      <!-- ════════════════════════════════════════════════════════ -->
+      <section class="product-reviews-section hidden" id="product-reviews-section">
+        
+        <!-- Header & Summary Card -->
+        <div class="reviews-header">
+          <div>
+            <span class="section__eyebrow" style="margin-bottom: var(--space-1);">Community Feedback</span>
+            <h2 class="reviews-title">Customer Reviews</h2>
+            <p class="reviews-subtitle">Authentic reviews from families cooking with our traditional cold-pressed oils.</p>
+          </div>
+          
+          <div class="reviews-summary-card" id="reviews-summary-card">
+            <div class="reviews-summary-rating">
+              <span class="reviews-summary-score" id="reviews-avg-score">—</span>
+              <span class="reviews-summary-out-of">/ 5</span>
+            </div>
+            <div class="reviews-summary-stars" id="reviews-summary-stars">☆☆☆☆☆</div>
+            <div class="reviews-summary-count" id="reviews-total-count">0 customer reviews</div>
+          </div>
+        </div>
+
+        <!-- Reviews Layout Grid (Feedback List + Review Form) -->
+        <div class="reviews-layout">
+          
+          <!-- Left Column: Customer Feedback List -->
+          <div class="reviews-list-column">
+            <h3 class="reviews-column-title">Customer Feedback</h3>
+            
+            <!-- Loading State -->
+            <div class="reviews-state reviews-state--loading" id="reviews-loading">
+              <div class="loading-spinner"></div>
+              <p class="text-muted" style="margin-top: var(--space-3);">Loading customer reviews...</p>
+            </div>
+
+            <!-- Error State -->
+            <div class="reviews-state reviews-state--error hidden" id="reviews-error">
+              <p class="text-danger" id="reviews-error-msg">Unable to load reviews right now.</p>
+              <button type="button" class="btn btn--secondary btn--sm" id="btn-retry-reviews" style="margin-top: var(--space-3);">
+                🔄 Retry Loading
+              </button>
+            </div>
+
+            <!-- Empty State -->
+            <div class="reviews-state reviews-state--empty hidden" id="reviews-empty">
+              <div class="reviews-empty-icon">💬</div>
+              <h4 style="color: var(--color-deep-olive); margin-bottom: var(--space-2);">No Reviews Yet</h4>
+              <p class="text-muted" style="max-width: 360px; margin: 0 auto;">
+                Be the first customer to share your thoughts on the aroma, purity, and culinary taste of this cold-pressed oil!
+              </p>
+            </div>
+
+            <!-- Reviews Cards List Container -->
+            <div class="reviews-cards" id="reviews-cards-container">
+              <!-- Dynamically populated by product.js -->
+            </div>
+          </div>
+
+          <!-- Right Column: Write a Review Form -->
+          <div class="reviews-form-column">
+            <div class="review-form-card">
+              <h3 class="reviews-column-title">Share Your Experience</h3>
+
+              <!-- Authenticated Review Form -->
+              <form id="review-form" class="review-form hidden" novalidate>
+                <div class="review-form__user-badge">
+                  <span>✍️ Posting as:</span>
+                  <strong id="review-form-user-name">Customer</strong>
+                </div>
+
+                <!-- Star Rating Selector -->
+                <div class="form-group" style="margin-bottom: var(--space-4);">
+                  <label class="form-label">Your Rating *</label>
+                  <div class="star-rating-input" id="star-rating-input" role="radiogroup" aria-label="Rating from 1 to 5 stars">
+                    <button type="button" class="star-btn is-active" data-value="1" aria-label="1 star">★</button>
+                    <button type="button" class="star-btn is-active" data-value="2" aria-label="2 stars">★</button>
+                    <button type="button" class="star-btn is-active" data-value="3" aria-label="3 stars">★</button>
+                    <button type="button" class="star-btn is-active" data-value="4" aria-label="4 stars">★</button>
+                    <button type="button" class="star-btn is-active" data-value="5" aria-label="5 stars">★</button>
+                  </div>
+                  <div class="star-rating-label" id="star-rating-label">5 stars — Excellent</div>
+                </div>
+
+                <!-- Comment Textarea -->
+                <div class="form-group" style="margin-bottom: var(--space-4);">
+                  <label class="form-label" for="review-comment">Your Review *</label>
+                  <textarea
+                    id="review-comment"
+                    class="review-textarea"
+                    rows="4"
+                    maxlength="1000"
+                    placeholder="Tell us about the flavour, aroma, and packaging of this oil..."
+                    required
+                  ></textarea>
+                  <div class="review-char-counter">
+                    <span id="review-char-count">0</span> / 1000 characters
+                  </div>
+                </div>
+
+                <!-- Error / Feedback Notice -->
+                <div id="review-submit-feedback" class="review-feedback hidden"></div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn--primary" id="btn-submit-review" style="width: 100%;">
+                  Publish Review
+                </button>
+              </form>
+
+              <!-- Unauthenticated Sign-in Prompt -->
+              <div id="review-auth-prompt" class="review-auth-prompt">
+                <div class="review-auth-prompt__icon">🔒</div>
+                <h4 style="color: var(--color-deep-olive); margin-bottom: var(--space-2);">Purchased this oil?</h4>
+                <p class="text-secondary" style="font-size: var(--text-sm); margin-bottom: var(--space-5);">
+                  Sign in with Google to share your verified review and cooking feedback with other customers.
+                </p>
+                <button type="button" class="btn btn--primary btn--sm" id="btn-review-google-login">
+                  Sign in with Google
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
     </div>
   </main>
 
@@ -264,4 +409,3 @@
   <script type="module" src="js/product.js"></script>
 </body>
 </html>
-

@@ -1,0 +1,316 @@
+/* ============================================================
+   ORDERS.CSS — Customer Order History Styles
+   Sri Kamatchi Amman Traders — E-Commerce Storefront
+   ============================================================ */
+
+.orders-page {
+  padding-top: calc(var(--nav-height) + var(--space-8));
+  padding-bottom: var(--space-16);
+  min-height: 80vh;
+  background-color: var(--color-surface);
+}
+
+.orders-header {
+  margin-bottom: var(--space-8);
+}
+
+.orders-header__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--color-deep-olive);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.orders-header__subtitle {
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+}
+
+/* ── Order State Cards (Unauth, Loading, Empty, Error) ── */
+.orders-state-card {
+  background-color: var(--color-surface-elevated);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-xl);
+  padding: var(--space-12) var(--space-6);
+  text-align: center;
+  max-width: 580px;
+  margin: var(--space-8) auto;
+  box-shadow: var(--shadow-sm);
+}
+
+.orders-state-card__icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-4);
+  line-height: 1;
+}
+
+.orders-state-card__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-deep-olive);
+  margin-bottom: var(--space-2);
+}
+
+.orders-state-card__desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-6);
+  max-width: 440px;
+  margin-inline: auto;
+}
+
+/* ── Orders List ── */
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 860px;
+  margin-inline: auto;
+}
+
+/* ── Order Card ── */
+.order-card {
+  background-color: var(--color-surface-elevated);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+.order-card:hover {
+  border-color: var(--color-gray-300);
+  box-shadow: var(--shadow-md);
+}
+
+.order-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6);
+  background-color: var(--color-gray-50);
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.order-card__meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.order-card__number {
+  font-family: monospace;
+  font-weight: 700;
+  font-size: var(--text-base);
+  color: var(--color-deep-olive);
+  letter-spacing: 0.05em;
+}
+
+.order-card__date {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+/* ── Status Pills ── */
+.order-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.order-status-pill--placed {
+  background-color: rgba(212, 168, 67, 0.15);
+  color: var(--color-rich-amber);
+}
+
+.order-status-pill--confirmed {
+  background-color: rgba(74, 124, 63, 0.12);
+  color: var(--color-leaf-green);
+}
+
+.order-status-pill--shipped {
+  background-color: rgba(74, 124, 159, 0.15);
+  color: var(--color-info);
+}
+
+.order-status-pill--delivered {
+  background-color: rgba(74, 124, 63, 0.2);
+  color: #276721;
+}
+
+.order-status-pill--cancelled {
+  background-color: rgba(196, 69, 60, 0.12);
+  color: var(--color-error);
+}
+
+/* ── Order Body ── */
+.order-card__body {
+  padding: var(--space-6);
+}
+
+/* ── Line Items ── */
+.order-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.order-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px dashed var(--color-gray-200);
+}
+
+.order-item-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.order-item-row__info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex: 1;
+}
+
+.order-item-row__img {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  background-color: var(--color-gray-100);
+  border: 1px solid var(--color-gray-200);
+  flex-shrink: 0;
+}
+
+.order-item-row__details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.order-item-row__name {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-deep-olive);
+}
+
+.order-item-row__sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.order-item-row__price {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ── Order Info Grid (Address + Payment) ── */
+.order-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-gray-100);
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 640px) {
+  .order-info-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+}
+
+.order-info-block__label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-1);
+}
+
+.order-info-block__content {
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+/* ── Order Footer Summary ── */
+.order-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  background-color: var(--color-gray-50);
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.order-breakdown {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  flex-wrap: wrap;
+}
+
+.order-total-badge {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.order-total-badge__label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.order-total-badge__amount {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-deep-olive);
+}
+
+/* ── Animations / Helper ── */
+.orders-page .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-gray-200);
+  border-top-color: var(--color-gold-primary);
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+  margin: 0 auto var(--space-4);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+

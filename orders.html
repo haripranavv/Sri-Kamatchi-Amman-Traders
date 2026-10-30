@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="View and track your past orders from Sri Kamatchi Amman Traders." />
+  <title>My Orders — Sri Kamatchi Amman Traders</title>
+
+  <!-- Google Fonts: Inter + Outfit + Noto Sans Tamil -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="My Orders — Sri Kamatchi Amman Traders" />
+  <meta property="og:description" content="View and track your traditional cold-pressed cooking oil orders." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/images/products/sesame-oil.webp" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>🛢️</text></svg>" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/cart.css" />
+  <link rel="stylesheet" href="css/orders.css" />
+
+  <style>
+    .hidden { display: none !important; }
+  </style>
+</head>
+
+<body>
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- NAVBAR                                                   -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="navbar__inner">
+      <!-- Brand -->
+      <a href="index.html" class="navbar__brand" id="nav-brand">
+        <span class="navbar__brand-icon" aria-hidden="true">🛢️</span>
+        <span>Sri Kamatchi Amman</span>
+      </a>
+
+      <!-- Nav Links -->
+      <div class="navbar__nav" id="nav-links">
+        <a href="index.html#hero" class="navbar__link">Home</a>
+        <a href="index.html#products-section" class="navbar__link">Products</a>
+        <a href="index.html#categories-section" class="navbar__link">Categories</a>
+      </div>
+
+      <!-- Auth Actions & Cart -->
+      <div class="navbar__actions" id="nav-auth-actions">
+        <!-- Cart Trigger Button -->
+        <button class="navbar__cart-btn" id="nav-cart-btn" aria-label="Shopping Cart" data-action="open-cart">
+          <span aria-hidden="true">🛒</span>
+          <span class="navbar__cart-badge is-zero" id="nav-cart-badge">0</span>
+        </button>
+
+        <!-- Signed Out: Show Sign In button -->
+        <button class="btn btn--primary btn--sm" id="nav-sign-in-btn">
+          Sign in with Google
+        </button>
+
+        <!-- Signed In: Show User Menu -->
+        <div class="user-menu hidden" id="user-menu-container">
+          <button class="user-menu__trigger" id="user-menu-trigger" aria-haspopup="true" aria-expanded="false">
+            <img class="avatar" src="" alt="User avatar" id="user-avatar" width="36" height="36" />
+          </button>
+
+          <div class="user-menu__dropdown" id="user-menu-dropdown" role="menu">
+            <div class="user-menu__header">
+              <p class="user-menu__name" id="user-name"></p>
+              <p class="user-menu__email" id="user-email"></p>
+              <span class="dashboard-card__badge dashboard-card__badge--admin hidden" id="user-role-badge" style="margin-top:6px; display:inline-block;"></span>
+            </div>
+
+            <a href="orders.html" class="user-menu__item is-active" id="user-menu-orders-link" role="menuitem">
+              📦 My Orders
+            </a>
+
+            <a href="admin.html" class="user-menu__item hidden" id="user-menu-admin-link" role="menuitem">
+              ⚙️ Admin Portal
+            </a>
+
+            <div class="user-menu__divider"></div>
+
+            <button class="user-menu__item user-menu__item--danger" id="sign-out-btn" role="menuitem">
+              🚪 Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- MAIN ORDERS VIEW                                         -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <main class="orders-page">
+    <div class="container">
+      
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="index.html" class="breadcrumb__link">Home</a>
+        <span class="breadcrumb__sep">/</span>
+        <span style="color:var(--color-text-primary); font-weight:600;">My Orders</span>
+      </nav>
+
+      <!-- Page Header -->
+      <header class="orders-header">
+        <h1 class="orders-header__title">
+          <span>📦</span>
+          <span>My Orders</span>
+          <span style="font-family: var(--font-tamil); font-size: var(--text-lg); font-weight: 500; color: var(--color-gold-dark); margin-left: var(--space-2);">
+            (எனது ஆர்டர்கள்)
+          </span>
+        </h1>
+        <p class="orders-header__subtitle">
+          Review your cooking oil order history, fulfillment status, and delivery details.
+        </p>
+      </header>
+
+      <!-- ── State 1: Loading State ── -->
+      <section class="orders-state-card" id="orders-loading-state">
+        <div class="spinner"></div>
+        <h2 class="orders-state-card__title">Loading Your Orders</h2>
+        <p class="orders-state-card__desc">Fetching your past orders from secure cloud storage...</p>
+      </section>
+
+      <!-- ── State 2: Unauthenticated (Sign In Required) ── -->
+      <section class="orders-state-card hidden" id="orders-unauth-state">
+        <div class="orders-state-card__icon">🔐</div>
+        <h2 class="orders-state-card__title">Sign In to View Orders</h2>
+        <p class="orders-state-card__desc">
+          Please sign in with your Google account to view your past purchases, track active deliveries, and inspect invoice details.
+        </p>
+        <button class="btn btn--primary" id="btn-orders-google-login" style="margin-inline: auto;">
+          Sign in with Google
+        </button>
+      </section>
+
+      <!-- ── State 3: Empty Orders State ── -->
+      <section class="orders-state-card hidden" id="orders-empty-state">
+        <div class="orders-state-card__icon">🛢️</div>
+        <h2 class="orders-state-card__title">No Orders Yet</h2>
+        <p class="orders-state-card__desc">
+          You haven't placed any cooking oil orders yet. Explore our cold-pressed sesame, groundnut, and coconut oils!
+        </p>
+        <a href="index.html#products-section" class="btn btn--primary" style="margin-inline: auto;">
+          Explore Our Oils
+        </a>
+      </section>
+
+      <!-- ── State 4: Error State ── -->
+      <section class="orders-state-card hidden" id="orders-error-state">
+        <div class="orders-state-card__icon">⚠️</div>
+        <h2 class="orders-state-card__title">Unable to Load Orders</h2>
+        <p class="orders-state-card__desc" id="orders-error-message">
+          An error occurred while fetching your orders. Please check your connection and try again.
+        </p>
+        <button class="btn btn--secondary" id="btn-orders-retry" style="margin-inline: auto;">
+          Try Again
+        </button>
+      </section>
+
+      <!-- ── State 5: Authenticated Orders List ── -->
+      <section class="orders-list hidden" id="orders-list-container" aria-label="Customer Orders">
+        <!-- Dynamically rendered order cards -->
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- FOOTER                                                   -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <footer class="footer" style="background-color: var(--color-surface); border-top: 1px solid var(--color-gray-200); padding: var(--space-12) 0 var(--space-8);">
+    <div class="container text-center">
+      <p style="font-weight: 700; color: var(--color-deep-olive); margin-bottom: var(--space-2);">
+        🛢️ Sri Kamatchi Amman Traders
+      </p>
+      <p class="text-sm text-secondary" style="max-width: 500px; margin: 0 auto var(--space-4);">
+        Wholesome traditional cold-pressed cooking oils serving families across Tamil Nadu.
+      </p>
+      <p class="text-xs text-muted">
+        © 2026 Sri Kamatchi Amman Traders. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Module Script -->
+  <script type="module" src="js/orders.js"></script>
+</body>
+</html>
+

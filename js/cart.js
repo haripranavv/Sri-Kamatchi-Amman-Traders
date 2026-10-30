@@ -29,7 +29,7 @@ export function getCartItemKey(productId, variantId) {
 
 /**
  * Load cart items from localStorage.
- * Handles parsing errors gracefully.
+ * Handles parsing errors gracefully, validates entries, and discards corrupt data.
  * 
  * @returns {Array<Object>}
  */
@@ -38,7 +38,31 @@ export function getCart() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+
+    // Validate and sanitize every cart item to guard against corruption or malformed entries
+    const validItems = parsed.filter(item => {
+      if (!item || typeof item !== 'object') return false;
+      if (!item.key || typeof item.key !== 'string') return false;
+      const qty = parseInt(item.quantity, 10);
+      if (isNaN(qty) || qty <= 0) return false;
+      const price = Number(item.unitPrice !== undefined ? item.unitPrice : item.price);
+      if (isNaN(price) || price < 0) return false;
+      return true;
+    }).map(item => {
+      const pId = String(item.productId || (typeof item.key === 'string' ? item.key.split('__')[0] : '') || 'product');
+      return {
+        ...item,
+        productId: pId,
+        quantity: parseInt(item.quantity, 10),
+        unitPrice: Number(item.unitPrice !== undefined ? item.unitPrice : item.price),
+        price: Number(item.price !== undefined ? item.price : item.unitPrice),
+        stock: (item.stock !== undefined && !isNaN(parseInt(item.stock, 10))) ? parseInt(item.stock, 10) : 0,
+        isSample: Boolean(item.isSample || pId.startsWith('demo-'))
+      };
+    });
+
+    return validItems;
   } catch (error) {
     console.warn('[Cart] Failed to read cart from localStorage, initializing empty:', error);
     return [];
@@ -129,8 +153,18 @@ export function addToCart(product, variant = null, quantity = 1) {
     : null;
   const unitPrice = discountPrice !== null ? discountPrice : regularPrice;
 
-  // Stock check
-  const availableStock = selectedVariant.stock !== undefined ? parseInt(selectedVariant.stock, 10) : 50;
+  // Stock check: Authoritative stock must be a valid integer > 0; missing/invalid stock is never treated as unlimited
+  const rawStock = selectedVariant.stock !== undefined
+    ? parseInt(selectedVariant.stock, 10)
+    : (product.stock !== undefined ? parseInt(product.stock, 10) : NaN);
+  const availableStock = isNaN(rawStock) ? 0 : rawStock;
+
+  if (availableStock <= 0) {
+    return {
+      success: false,
+      message: `"${product.name || 'Product'}" (${selectedVariant.size || '1L'}) is currently out of stock.`
+    };
+  }
 
   const currentCart = getCart();
   const existingIndex = currentCart.findIndex(item => item.key === itemKey);
@@ -140,10 +174,19 @@ export function addToCart(product, variant = null, quantity = 1) {
   if (existingIndex > -1) {
     // Merge existing item
     const existing = currentCart[existingIndex];
+    if (existing.quantity >= availableStock) {
+      return {
+        success: false,
+        item: existing,
+        message: `Cannot add more. Maximum available stock (${availableStock}) already in your cart.`
+      };
+    }
+
     const newQty = existing.quantity + addQty;
 
-    if (availableStock > 0 && newQty > availableStock) {
+    if (newQty > availableStock) {
       existing.quantity = availableStock;
+      existing.stock = availableStock;
       saveCart(currentCart);
       return {
         success: true,
@@ -153,10 +196,11 @@ export function addToCart(product, variant = null, quantity = 1) {
     }
 
     existing.quantity = newQty;
+    existing.stock = availableStock;
     targetItem = existing;
   } else {
-    // New cart item
-    const initialQty = availableStock > 0 ? Math.min(addQty, availableStock) : addQty;
+    // New cart item: strictly bounded by available stock
+    const initialQty = Math.min(addQty, availableStock);
     const isSample = Boolean(product.isSample || String(product.id).startsWith('demo-'));
 
     targetItem = {
@@ -186,7 +230,8 @@ export function addToCart(product, variant = null, quantity = 1) {
 
 /**
  * Update the quantity of a cart item by its unique key.
- * If newQuantity <= 0, the item is removed.
+ * If newQuantity <= 0 or item is out of stock, the item is removed.
+ * Enforces authoritative stock upper bound.
  * 
  * @param {string} itemKey - Composite key (`${productId}__${variantId}`)
  * @param {number} newQuantity
@@ -204,8 +249,14 @@ export function updateQuantity(itemKey, newQuantity) {
   }
 
   const item = currentCart[index];
-  if (item.stock > 0 && qty > item.stock) {
-    item.quantity = item.stock;
+  const maxStock = (item.stock !== undefined && !isNaN(parseInt(item.stock, 10))) ? parseInt(item.stock, 10) : 0;
+
+  if (maxStock <= 0) {
+    return removeFromCart(itemKey);
+  }
+
+  if (qty > maxStock) {
+    item.quantity = maxStock;
   } else {
     item.quantity = qty;
   }
@@ -281,7 +332,7 @@ export function getCartTotal() {
  * @returns {boolean}
  */
 export function hasSampleItems() {
-  return getCart().some(i => i.isSample === true || String(i.productId).startsWith('demo-'));
+  return getCart().some(i => i && (i.isSample === true || String(i.productId || '').startsWith('demo-')));
 }
 
 /**

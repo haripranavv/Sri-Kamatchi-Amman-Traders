@@ -4,40 +4,31 @@ service firebase.storage {
   match /b/{bucket}/o {
 
     // ──────────────────────────────────────────────
-    // Helper: validate image file type and size
+    // Storage Security Rules — Sri Kamatchi Amman Traders
     // ──────────────────────────────────────────────
-    function isValidProductImage() {
-      return request.resource.size < 5 * 1024 * 1024  // 5 MB max
-        && request.resource.contentType.matches('image/(jpeg|png|webp|gif)');
-    }
+    // ARCHITECTURAL DESIGN NOTE:
+    // To operate fully within the Firebase Spark (free) tier and avoid
+    // paid Blaze plan upgrade requirements, all product images and media
+    // are stored as static local assets in `assets/images/products/`
+    // and served directly through Firebase Hosting with global CDN caching.
+    //
+    // Product-image uploads and writes through Firebase Storage are
+    // INTENTIONALLY DISABLED.
+    // ──────────────────────────────────────────────
 
-    function isValidAvatar() {
-      return request.resource.size < 2 * 1024 * 1024  // 2 MB max
-        && request.resource.contentType.matches('image/(jpeg|png|webp)');
-    }
-
-    // ──────────────────────────────────────────────
-    // Product images
-    // ──────────────────────────────────────────────
-    // Publicly readable so customers can see product photos.
-    // Uploads restricted to authenticated users with valid image format and size.
+    // Product images: public read preserved for any existing/legacy assets; writes denied
     match /products/{productId}/{filename} {
       allow read: if true;
-      allow write: if request.auth != null
-        && isValidProductImage();
+      allow write: if false; // Intentionally disabled: static assets in assets/images/ are used
     }
 
-    // ──────────────────────────────────────────────
-    // User avatars
-    // ──────────────────────────────────────────────
+    // User avatars: public read preserved; writes disabled
     match /users/{userId}/{filename} {
       allow read: if true;
-      allow write: if request.auth != null
-        && request.auth.uid == userId
-        && isValidAvatar();
+      allow write: if false;
     }
 
-    // Deny everything else by default
+    // Deny all other paths
     match /{allPaths=**} {
       allow read, write: if false;
     }

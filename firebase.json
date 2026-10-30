@@ -4,14 +4,20 @@
     "ignore": [
       "firebase.json",
       "firestore.rules",
+      "firestore.indexes.json",
       "storage.rules",
       ".env",
       ".env.*",
       ".gitignore",
       "README.md",
+      "architecture_plan.md",
+      ".vscode/**",
+      "package.json",
+      "package-lock.json",
       "node_modules/**",
       ".firebase/**",
-      ".git/**"
+      ".git/**",
+      "tests/**"
     ],
     "rewrites": [],
     "headers": [
@@ -27,6 +33,7 @@
     ]
   },
   "firestore": {
+    "indexes": "firestore.indexes.json",
     "rules": "firestore.rules"
   },
   "storage": {

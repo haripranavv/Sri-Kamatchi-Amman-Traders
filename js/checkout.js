@@ -13,7 +13,7 @@
 
 import { getCart, getCartSubtotal, getDeliveryCharge, getCartTotal, hasSampleItems, clearCart, onCartChange } from './cart.js';
 import { createOrder } from './firestore.js';
-import { initAuthObserver, signInWithGoogle, signOut, getCurrentUser, getCurrentUserProfile } from './auth.js';
+import { initAuthObserver, onAuthChange, signInWithGoogle, signOut, getCurrentUser, getCurrentUserProfile } from './auth.js';
 import { initCartUI } from './cart-ui.js';
 import { formatPrice, sanitizeHTML, showToast, $ } from './utils.js';
 import { STORE_CONFIG, isWhatsAppConfigured, buildWhatsAppLink } from './config.js';
@@ -66,6 +66,25 @@ const successBtnWhatsApp    = $('#success-btn-whatsapp');
 let currentUser = null;
 let currentProfile = null;
 let isSubmitting = false;
+let currentCheckoutIdempotencyKey = null;
+
+/**
+ * Obtain or generate a stable idempotency key for this checkout session.
+ * Reused on retries for the same cart attempt; invalidated when the cart changes or on order success.
+ * Conforms strictly to Firestore document ID constraints (/^[a-zA-Z0-9_-]{10,100}$/).
+ */
+function getOrCreateIdempotencyKey() {
+  if (!currentCheckoutIdempotencyKey && currentUser) {
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+    const timeCode = Date.now().toString(36);
+    currentCheckoutIdempotencyKey = `ord_${currentUser.uid.slice(0, 8)}_${timeCode}_${randomSuffix}`;
+  }
+  return currentCheckoutIdempotencyKey;
+}
+
+function invalidateIdempotencyKey() {
+  currentCheckoutIdempotencyKey = null;
+}
 
 /**
  * Initialize checkout page.
@@ -75,8 +94,9 @@ function initCheckoutPage() {
   setupAuthNavbar();
   renderSummary();
 
-  // Re-render summary whenever cart changes
+  // Re-render summary whenever cart changes & invalidate key to reflect new cart composition
   onCartChange(() => {
+    invalidateIdempotencyKey();
     renderSummary();
   });
 
@@ -86,12 +106,18 @@ function initCheckoutPage() {
   // Wire WhatsApp checkout button (for users without Google login)
   setupWhatsAppCheckout();
 
-  // Clear field errors on input
-  inputName?.addEventListener('input', () => clearFieldError(inputName, errName));
-  inputPhone?.addEventListener('input', () => clearFieldError(inputPhone, errPhone));
-  inputAddress1?.addEventListener('input', () => clearFieldError(inputAddress1, errAddress1));
-  inputCity?.addEventListener('input', () => clearFieldError(inputCity, errCity));
-  inputPincode?.addEventListener('input', () => clearFieldError(inputPincode, errPincode));
+  // Clear field errors on input & invalidate idempotency key when checkout details change
+  const onFieldChange = (inputEl, errEl) => {
+    clearFieldError(inputEl, errEl);
+    invalidateIdempotencyKey();
+  };
+  inputName?.addEventListener('input', () => onFieldChange(inputName, errName));
+  inputPhone?.addEventListener('input', () => onFieldChange(inputPhone, errPhone));
+  inputAddress1?.addEventListener('input', () => onFieldChange(inputAddress1, errAddress1));
+  inputAddress2?.addEventListener('input', () => invalidateIdempotencyKey());
+  inputCity?.addEventListener('input', () => onFieldChange(inputCity, errCity));
+  inputPincode?.addEventListener('input', () => onFieldChange(inputPincode, errPincode));
+  inputNotes?.addEventListener('input', () => invalidateIdempotencyKey());
 }
 
 /**
@@ -126,7 +152,7 @@ function renderSummary() {
   // Render items list
   itemsListEl.innerHTML = items.map(item => `
     <div class="checkout-item">
-      <img src="${sanitizeHTML(item.imageURL || STORE_CONFIG.placeholderImage)}" alt="${sanitizeHTML(item.name)}" class="checkout-item__thumb" onerror="this.onerror=null; this.src='${STORE_CONFIG.placeholderImage}';" />
+      <img src="${sanitizeHTML(item.imageURL || STORE_CONFIG.placeholderImage)}" alt="${sanitizeHTML(item.name)}" width="52" height="52" loading="lazy" class="checkout-item__thumb" onerror="this.onerror=null; this.src='${STORE_CONFIG.placeholderImage}';" />
       <div class="checkout-item__details">
         <h4 class="checkout-item__title">${sanitizeHTML(item.name)}</h4>
         <p class="checkout-item__meta">${sanitizeHTML(item.size)} × ${item.quantity}</p>
@@ -346,6 +372,14 @@ async function handleOrderSubmission() {
   isSubmitting = true;
   updateSubmitButtonState(items, false, getCartTotal());
 
+  // Obtain stable idempotency key for this checkout attempt (reused on retry)
+  const idempotencyKey = getOrCreateIdempotencyKey();
+  if (!idempotencyKey) {
+    isSubmitting = false;
+    showToast('Please sign in with Google to place your order.', 'warning');
+    return;
+  }
+
   try {
     const orderData = {
       userId: currentUser.uid,
@@ -361,19 +395,27 @@ async function handleOrderSubmission() {
       },
       items: items,
       notes: (inputNotes?.value || '').trim(),
-      paymentMethod: 'cash_on_delivery'
+      paymentMethod: 'cash_on_delivery',
+      idempotencyKey: idempotencyKey
     };
 
-    // Call Firestore createOrder (which performs live catalog re-verification)
+    // Call Firestore createOrder (which performs atomic transaction check/create)
     const createdOrder = await createOrder(orderData);
 
-    // 5. Success: Clear cart & render confirmation view
+    // 5. Success: Clear cart, invalidate key, & render confirmation view
     clearCart();
+    invalidateIdempotencyKey();
     showOrderSuccess(createdOrder);
     showToast('Order placed successfully!', 'success');
   } catch (error) {
-    console.error('[Checkout] Order placement error:', error);
-    showToast(error.message || 'Failed to place order. Please try again.', 'error');
+    console.error('[Checkout] Order placement error:', error.message);
+    if (error.message && (error.message.includes('conflict') || error.message.includes('already exists'))) {
+      invalidateIdempotencyKey();
+    }
+    const sanitizedMsg = error.message.includes('permission-denied')
+      ? 'Permission denied. Please ensure you are logged in.'
+      : (error.message || 'Failed to place order. Please check your connection.');
+    showToast(sanitizedMsg, 'error');
   } finally {
     isSubmitting = false;
     updateSubmitButtonState(getCart(), hasSampleItems(), getCartTotal());
@@ -463,9 +505,10 @@ function setupAuthNavbar() {
     userMenuDropdown?.classList.remove('is-open');
   });
 
-  initAuthObserver((user, profile) => {
+  const syncAuthState = (user, profile) => {
     currentUser = user;
     currentProfile = profile;
+    invalidateIdempotencyKey();
 
     if (user) {
       // Navbar updates
@@ -507,7 +550,11 @@ function setupAuthNavbar() {
     }
 
     renderSummary();
-  });
+  };
+
+  // Start auth observer once, and register persistent listener for reactive updates
+  initAuthObserver();
+  onAuthChange(syncAuthState);
 }
 
 // Bootstrap

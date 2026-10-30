@@ -1,0 +1,13 @@
+{
+  "name": "sri-kamatchi-firestore-rules-tests",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node runner.mjs",
+    "test:raw": "node --test firestore.rules.test.mjs"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^3.0.4"
+  }
+}

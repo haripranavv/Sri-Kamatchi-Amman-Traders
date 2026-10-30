@@ -6,10 +6,16 @@
   <meta name="description" content="Secure Checkout — Sri Kamatchi Amman Traders cooking oils." />
   <title>Checkout — Sri Kamatchi Amman Traders</title>
 
-  <!-- Google Fonts: Outfit (English) + Noto Sans Tamil -->
+  <!-- Google Fonts: Inter + Outfit + Noto Sans Tamil -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Checkout — Sri Kamatchi Amman Traders" />
+  <meta property="og:description" content="Secure Cash on Delivery checkout for authentic cold-pressed cooking oils across Tamil Nadu." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/images/products/sesame-oil.webp" />
 
   <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>🛢️</text></svg>" />
@@ -60,7 +66,7 @@
         <!-- Signed In: Show User Menu -->
         <div class="user-menu hidden" id="user-menu-container">
           <button class="user-menu__trigger" id="user-menu-trigger" aria-haspopup="true" aria-expanded="false">
-            <img class="avatar" src="" alt="User avatar" id="user-avatar" />
+            <img class="avatar" src="" alt="User avatar" id="user-avatar" width="36" height="36" />
           </button>
 
           <div class="user-menu__dropdown" id="user-menu-dropdown" role="menu">
@@ -69,6 +75,10 @@
               <p class="user-menu__email" id="user-email"></p>
               <span class="dashboard-card__badge dashboard-card__badge--admin hidden" id="user-role-badge" style="margin-top:6px; display:inline-block;"></span>
             </div>
+
+            <a href="orders.html" class="user-menu__item" id="user-menu-orders-link" role="menuitem">
+              📦 My Orders
+            </a>
 
             <a href="admin.html" class="user-menu__item hidden" id="user-menu-admin-link" role="menuitem">
               ⚙️ Admin Portal

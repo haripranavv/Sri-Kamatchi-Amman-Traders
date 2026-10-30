@@ -9,9 +9,10 @@ firebase-debug.log
 firestore-debug.log
 ui-debug.log
 
-# Node (for future Cloud Functions)
+# Node (for future Cloud Functions and test harnesses)
 node_modules/
 package-lock.json
+*.jar
 
 # OS
 .DS_Store

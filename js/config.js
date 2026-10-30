@@ -20,14 +20,14 @@ export const STORE_CONFIG = {
   storeNameTamil: 'ஸ்ரீ காமாட்சி அம்மன் டிரேடர்ஸ்',
   tagline: 'Pure Cold Pressed Traditional Cooking Oils',
   location: 'Tamil Nadu, India',
-  
+
   // Enter business WhatsApp number here with country code (e.g., '91XXXXXXXXXX')
   // Kept empty ("") by default until owner sets their official number.
-  whatsappPhone: '',
+  whatsappPhone: '919361455863',
 
   // Commerce rules
   deliveryFee: 40,              // Standard delivery fee in ₹
-  freeDeliveryThreshold: 999,   // Free delivery on orders over ₹999
+  freeDeliveryThreshold: 699,   // Free delivery on orders over ₹999
   codAvailable: true,           // Cash on delivery available
 
   // Fallback placeholder image

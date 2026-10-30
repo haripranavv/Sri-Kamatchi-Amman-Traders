@@ -233,9 +233,9 @@ export function renderProductCard(product) {
   let mediaHTML;
   const imageSrc = product.imageURL || (Array.isArray(product.imageURLs) && product.imageURLs[0]);
   if (imageSrc) {
-    mediaHTML = `<img src="${sanitizeHTML(imageSrc)}" alt="${sanitizeHTML(product.name)}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy" onerror="this.onerror=null; this.src='${fallbackPlaceholder}';" />`;
+    mediaHTML = `<img src="${sanitizeHTML(imageSrc)}" alt="${sanitizeHTML(product.name)}" width="400" height="300" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy" onerror="this.onerror=null; this.src='${fallbackPlaceholder}';" />`;
   } else {
-    mediaHTML = `<img src="${fallbackPlaceholder}" alt="${sanitizeHTML(product.name)}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy" />`;
+    mediaHTML = `<img src="${fallbackPlaceholder}" alt="${sanitizeHTML(product.name)}" width="400" height="300" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy" />`;
   }
 
   // Variant size description

@@ -27,6 +27,9 @@ let currentUser = null;
 let currentUserProfile = null;
 let authStateListeners = [];
 let isExplicitSignIn = false; // True when signInWithGoogle() triggers the auth change
+let isAuthResolved = false;   // True once Firebase Auth completes initial state resolution
+let isObserverInitialized = false; // Prevents redundant onAuthStateChanged registrations
+let pendingOnReadyCallbacks = [];  // Collects onReady callbacks across repeated init calls
 
 
 /**
@@ -65,8 +68,8 @@ export async function isCurrentUserAdmin() {
 export function onAuthChange(listener) {
   authStateListeners.push(listener);
 
-  // Immediately fire with current state if auth is already resolved
-  if (currentUser !== undefined) {
+  // Immediately fire with current state ONLY if auth has completed initial resolution
+  if (isAuthResolved) {
     listener(currentUser, currentUserProfile);
   }
 
@@ -152,9 +155,25 @@ export function initAuthObserver(onReady) {
   if (isFirebaseConfigMissing()) {
     currentUser = null;
     currentUserProfile = null;
+    isAuthResolved = true;
     if (onReady) onReady(null, null);
     return;
   }
+
+  // Handle onReady callback registration
+  if (onReady) {
+    if (isAuthResolved) {
+      onReady(currentUser, currentUserProfile);
+    } else {
+      pendingOnReadyCallbacks.push(onReady);
+    }
+  }
+
+  // Prevent duplicate onAuthStateChanged registrations if called repeatedly
+  if (isObserverInitialized) {
+    return;
+  }
+  isObserverInitialized = true;
 
   onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -184,11 +203,18 @@ export function initAuthObserver(onReady) {
       currentUserProfile = null;
     }
 
+    isAuthResolved = true;
     notifyListeners(currentUser, currentUserProfile);
 
-    if (onReady) {
-      onReady(currentUser, currentUserProfile);
-      onReady = null; // Only call once
+    // Drain one-shot onReady callbacks
+    const callbacks = pendingOnReadyCallbacks;
+    pendingOnReadyCallbacks = [];
+    for (const cb of callbacks) {
+      try {
+        cb(currentUser, currentUserProfile);
+      } catch (err) {
+        console.error('[Auth] onReady callback error:', err);
+      }
     }
   });
 }

@@ -27,6 +27,17 @@ let drawerElement = null;
 let backdropElement = null;
 
 /**
+ * Validates that an image URL begins with an allowed safe protocol or asset path.
+ * @param {string} url
+ * @returns {boolean}
+ */
+function isSafeImageUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  const trimmed = url.trim().toLowerCase();
+  return trimmed.startsWith('assets/') || trimmed.startsWith('https://') || trimmed.startsWith('http://');
+}
+
+/**
  * Build the full WhatsApp order enquiry message text from current cart items.
  * 
  * @param {Array<Object>} items
@@ -222,12 +233,13 @@ function renderDrawerContents() {
       : '';
 
     const fallbackImg = STORE_CONFIG.placeholderImage;
-    const imgUrl = item.imageURL || fallbackImg;
+    const imgUrl = isSafeImageUrl(item.imageURL) ? item.imageURL : fallbackImg;
+    const safeKey = sanitizeHTML(item.key || '');
 
     return `
-      <div class="cart-item" data-cart-key="${item.key}">
+      <div class="cart-item" data-cart-key="${safeKey}">
         <div class="cart-item__image-wrap">
-          <img src="${sanitizeHTML(imgUrl)}" alt="${sanitizeHTML(item.name)}" class="cart-item__image" onerror="this.onerror=null; this.src='${fallbackImg}';" />
+          <img src="${sanitizeHTML(imgUrl)}" alt="${sanitizeHTML(item.name)}" width="64" height="64" loading="lazy" class="cart-item__image" onerror="this.onerror=null; this.src='${fallbackImg}';" />
         </div>
         <div class="cart-item__info">
           <h4 class="cart-item__name">${sanitizeHTML(item.name)}</h4>
@@ -240,11 +252,11 @@ function renderDrawerContents() {
           </div>
         </div>
         <div class="cart-item__actions">
-          <button class="cart-item__remove-btn" data-action="remove-item" data-key="${item.key}" title="Remove item">✕</button>
+          <button class="cart-item__remove-btn" data-action="remove-item" data-key="${safeKey}" title="Remove item">✕</button>
           <div class="qty-stepper">
-            <button class="qty-stepper__btn" data-action="decrease-qty" data-key="${item.key}">−</button>
+            <button class="qty-stepper__btn" data-action="decrease-qty" data-key="${safeKey}">−</button>
             <span class="qty-stepper__val">${item.quantity}</span>
-            <button class="qty-stepper__btn" data-action="increase-qty" data-key="${item.key}" ${item.stock > 0 && item.quantity >= item.stock ? 'disabled' : ''}>+</button>
+            <button class="qty-stepper__btn" data-action="increase-qty" data-key="${safeKey}" ${item.stock > 0 && item.quantity >= item.stock ? 'disabled' : ''}>+</button>
           </div>
         </div>
       </div>
