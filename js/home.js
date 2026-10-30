@@ -8,8 +8,10 @@
  * - Category listing and sample testimonials
  */
 
-import { formatPrice, sanitizeHTML } from './utils.js';
+import { formatPrice, sanitizeHTML, showToast } from './utils.js';
 import { subscribeToProducts } from './firestore.js';
+import { addToCart } from './cart.js';
+import { openCartDrawer } from './cart-ui.js';
 
 // ═══════════════════════════════════════════════
 // SAMPLE DATA — For demonstration only
@@ -244,17 +246,23 @@ export function renderProductCard(product) {
     sizeText = `${product.sizes.length} sizes available (${product.sizes.join(', ')})`;
   }
 
+  const detailUrl = `product.html?id=${encodeURIComponent(product.id)}`;
+
   return `
     <article class="product-card reveal" data-product-id="${product.id}">
-      <div class="product-card__image-wrap">
-        ${mediaHTML}
-        <div class="product-card__badges">
-          ${badgesHTML}
+      <a href="${detailUrl}" class="product-card__image-link" aria-label="View ${sanitizeHTML(product.name)}">
+        <div class="product-card__image-wrap">
+          ${mediaHTML}
+          <div class="product-card__badges">
+            ${badgesHTML}
+          </div>
         </div>
-      </div>
+      </a>
       <div class="product-card__body">
         <p class="product-card__category">${sanitizeHTML(product.category || 'oil')}</p>
-        <h3 class="product-card__name">${sanitizeHTML(product.name)}</h3>
+        <a href="${detailUrl}" style="text-decoration: none; color: inherit;">
+          <h3 class="product-card__name">${sanitizeHTML(product.name)}</h3>
+        </a>
         ${product.nameTamil ? `<p class="product-card__name-tamil">${sanitizeHTML(product.nameTamil)}</p>` : ''}
         <p class="product-card__size">${sanitizeHTML(sizeText)}</p>
         <div class="product-card__pricing">
@@ -269,12 +277,12 @@ export function renderProductCard(product) {
           <span class="product-card__rating-text">${product.rating || 5} (${product.reviewCount || 0} reviews)</span>
         </div>
         <div class="product-card__actions">
-          <button class="btn btn--primary btn--sm" disabled title="Ordering opens in Phase 4">
+          <button class="btn btn--primary btn--sm" data-action="add-to-cart" data-product-id="${product.id}">
             🛒 Add to Cart
           </button>
-          <button class="btn btn--secondary btn--sm" disabled title="Product details view opens in Phase 4">
+          <a href="${detailUrl}" class="btn btn--secondary btn--sm">
             View Details
-          </button>
+          </a>
         </div>
       </div>
     </article>
@@ -344,14 +352,39 @@ export function renderStorefront() {
   const productsSectionSubtitle = document.querySelector('#products-section .section__subtitle');
 
   if (productsContainer) {
+    let currentCatalog = [...SAMPLE_PRODUCTS];
+
+    const wireCartButtons = (productList) => {
+      currentCatalog = productList;
+      productsContainer.querySelectorAll('[data-action="add-to-cart"]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const prodId = btn.getAttribute('data-product-id');
+          const targetProd = currentCatalog.find(p => p.id === prodId) || SAMPLE_PRODUCTS.find(p => p.id === prodId);
+          if (targetProd) {
+            const res = addToCart(targetProd);
+            if (res.success) {
+              showToast(`Added "${targetProd.name}" to cart.`, 'success');
+              openCartDrawer();
+            } else {
+              showToast(res.message || 'Could not add to cart.', 'error');
+            }
+          }
+        });
+      });
+    };
+
     // Show initial fallback/sample data while connecting to Firestore
     productsContainer.innerHTML = SAMPLE_PRODUCTS.map(renderProductCard).join('');
+    wireCartButtons(SAMPLE_PRODUCTS);
 
     // Subscribe to active products in Firestore
     subscribeToProducts((realProducts) => {
       if (realProducts && realProducts.length > 0) {
         // Real Firestore products exist! Render them with verified badges
         productsContainer.innerHTML = realProducts.map(renderProductCard).join('');
+        wireCartButtons(realProducts);
         if (productsSectionSubtitle) {
           productsSectionSubtitle.innerHTML = `
             Authentic cold-pressed cooking oils freshly updated from our shop.
@@ -360,6 +393,7 @@ export function renderStorefront() {
       } else {
         // No Firestore products published yet. Show demo products with honest notice.
         productsContainer.innerHTML = SAMPLE_PRODUCTS.map(renderProductCard).join('');
+        wireCartButtons(SAMPLE_PRODUCTS);
         if (productsSectionSubtitle) {
           productsSectionSubtitle.innerHTML = `
             Hand-selected premium oils loved by families across Tamil Nadu.

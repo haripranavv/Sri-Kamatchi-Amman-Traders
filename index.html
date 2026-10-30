@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/home.css" />
+  <link rel="stylesheet" href="css/cart.css" />
 
   <!-- GSAP CDN (animation library) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
@@ -54,6 +55,12 @@
 
       <!-- Auth Actions -->
       <div class="navbar__actions" id="nav-auth-actions">
+        <!-- Cart Trigger Button -->
+        <button class="navbar__cart-btn" id="nav-cart-btn" aria-label="Shopping Cart" data-action="open-cart">
+          <span aria-hidden="true">🛒</span>
+          <span class="navbar__cart-badge is-zero" id="nav-cart-badge">0</span>
+        </button>
+
         <!-- Signed Out: Show Sign In button -->
         <button class="btn btn--primary btn--sm" id="nav-sign-in-btn">
           Sign in with Google

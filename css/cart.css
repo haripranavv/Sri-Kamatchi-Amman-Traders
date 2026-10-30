@@ -1,0 +1,367 @@
+/* ============================================================
+   CART.CSS — Shopping Cart Drawer & Badge Styles
+   Sri Kamatchi Amman Traders — E-Commerce
+   ============================================================ */
+
+/* ── Navbar Cart Button & Badge ── */
+.navbar__cart-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-deep-olive);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.navbar__cart-btn:hover {
+  background-color: var(--color-gray-100);
+  border-color: var(--color-gold-primary);
+  transform: translateY(-1px);
+}
+
+.navbar__cart-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--color-white);
+  background: linear-gradient(135deg, var(--color-rich-amber), var(--color-deep-olive));
+  border-radius: var(--radius-full);
+  line-height: 1;
+}
+
+.navbar__cart-badge.is-zero {
+  opacity: 0.6;
+  background: var(--color-gray-400);
+}
+
+/* ── Cart Drawer Backdrop ── */
+.cart-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: var(--color-surface-overlay);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: var(--z-modal);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base);
+}
+
+.cart-drawer-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Cart Drawer Panel ── */
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 440px;
+  background-color: var(--color-surface-elevated);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+  z-index: calc(var(--z-modal) + 1);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform var(--transition-base) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cart-drawer-backdrop.is-open .cart-drawer {
+  transform: translateX(0);
+}
+
+/* Header */
+.cart-drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-gray-200);
+  background-color: var(--color-warm-cream);
+}
+
+.cart-drawer__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-deep-olive);
+}
+
+.cart-drawer__close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.cart-drawer__close:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-gray-200);
+}
+
+/* Sample Items Notice */
+.cart-drawer__sample-alert {
+  padding: var(--space-3) var(--space-6);
+  background-color: #fffbeb;
+  border-bottom: 1px solid #fde68a;
+  font-size: var(--text-xs);
+  color: #92400e;
+  line-height: 1.4;
+}
+
+/* Item List */
+.cart-drawer__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Empty State */
+.cart-drawer__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-12) var(--space-4);
+  color: var(--color-text-secondary);
+}
+
+.cart-drawer__empty-icon {
+  font-size: 3.5rem;
+  margin-bottom: var(--space-4);
+  opacity: 0.6;
+}
+
+.cart-drawer__empty-text {
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-6);
+  max-width: 260px;
+}
+
+/* Cart Item Card */
+.cart-item {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--transition-fast);
+}
+
+.cart-item:hover {
+  border-color: var(--color-gray-300);
+}
+
+.cart-item__image-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: var(--color-gray-100);
+  flex-shrink: 0;
+}
+
+.cart-item__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cart-item__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cart-item__name {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cart-item__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.cart-item__size-badge {
+  background-color: var(--color-gray-100);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  color: var(--color-deep-olive);
+}
+
+.cart-item__sample-badge {
+  background-color: #fef3c7;
+  color: #92400e;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 10px;
+}
+
+.cart-item__pricing {
+  margin-top: 2px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-deep-olive);
+}
+
+.cart-item__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.cart-item__remove-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
+}
+
+.cart-item__remove-btn:hover {
+  color: var(--color-error);
+}
+
+/* Stepper */
+.qty-stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-elevated);
+  overflow: hidden;
+}
+
+.qty-stepper__btn {
+  background: transparent;
+  border: none;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.qty-stepper__btn:hover:not(:disabled) {
+  background-color: var(--color-gray-100);
+}
+
+.qty-stepper__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.qty-stepper__val {
+  min-width: 24px;
+  text-align: center;
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+/* Drawer Footer */
+.cart-drawer__footer {
+  padding: var(--space-5) var(--space-6);
+  border-top: 1px solid var(--color-gray-200);
+  background-color: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.cart-drawer__summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.cart-drawer__summary-row--total {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--color-gray-200);
+}
+
+.cart-drawer__delivery-note {
+  font-size: var(--text-xs);
+  color: var(--color-rich-amber);
+  margin-top: -4px;
+}
+
+.cart-drawer__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.btn--whatsapp {
+  background-color: #25D366;
+  color: var(--color-white);
+  border: 1px solid #20bd5a;
+}
+
+.btn--whatsapp:hover:not(:disabled) {
+  background-color: #20bd5a;
+  color: var(--color-white);
+}
+
+.btn--whatsapp:disabled {
+  background-color: var(--color-gray-300);
+  border-color: var(--color-gray-300);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+

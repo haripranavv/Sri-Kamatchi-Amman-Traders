@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Secure Checkout — Sri Kamatchi Amman Traders cooking oils." />
+  <title>Checkout — Sri Kamatchi Amman Traders</title>
+
+  <!-- Google Fonts: Outfit (English) + Noto Sans Tamil -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>🛢️</text></svg>" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/cart.css" />
+  <link rel="stylesheet" href="css/checkout.css" />
+
+  <style>
+    .hidden { display: none !important; }
+  </style>
+</head>
+
+<body>
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- NAVBAR                                                   -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="navbar__inner">
+      <!-- Brand -->
+      <a href="index.html" class="navbar__brand" id="nav-brand">
+        <span class="navbar__brand-icon" aria-hidden="true">🛢️</span>
+        <span>Sri Kamatchi Amman</span>
+      </a>
+
+      <!-- Nav Links -->
+      <div class="navbar__nav" id="nav-links">
+        <a href="index.html#hero" class="navbar__link">Home</a>
+        <a href="index.html#products-section" class="navbar__link">Products</a>
+        <a href="index.html#categories-section" class="navbar__link">Categories</a>
+      </div>
+
+      <!-- Auth Actions & Cart -->
+      <div class="navbar__actions" id="nav-auth-actions">
+        <!-- Cart Trigger Button -->
+        <button class="navbar__cart-btn" id="nav-cart-btn" aria-label="Shopping Cart" data-action="open-cart">
+          <span aria-hidden="true">🛒</span>
+          <span class="navbar__cart-badge is-zero" id="nav-cart-badge">0</span>
+        </button>
+
+        <!-- Signed Out: Show Sign In button -->
+        <button class="btn btn--primary btn--sm" id="nav-sign-in-btn">
+          Sign in with Google
+        </button>
+
+        <!-- Signed In: Show User Menu -->
+        <div class="user-menu hidden" id="user-menu-container">
+          <button class="user-menu__trigger" id="user-menu-trigger" aria-haspopup="true" aria-expanded="false">
+            <img class="avatar" src="" alt="User avatar" id="user-avatar" />
+          </button>
+
+          <div class="user-menu__dropdown" id="user-menu-dropdown" role="menu">
+            <div class="user-menu__header">
+              <p class="user-menu__name" id="user-name"></p>
+              <p class="user-menu__email" id="user-email"></p>
+              <span class="dashboard-card__badge dashboard-card__badge--admin hidden" id="user-role-badge" style="margin-top:6px; display:inline-block;"></span>
+            </div>
+
+            <a href="admin.html" class="user-menu__item hidden" id="user-menu-admin-link" role="menuitem">
+              ⚙️ Admin Portal
+            </a>
+
+            <div class="user-menu__divider"></div>
+
+            <button class="user-menu__item user-menu__item--danger" id="sign-out-btn" role="menuitem">
+              🚪 Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- MAIN CHECKOUT VIEW                                       -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <main class="checkout-page">
+    <div class="container">
+      
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="index.html" class="breadcrumb__link">Home</a>
+        <span class="breadcrumb__sep">/</span>
+        <span style="color:var(--color-text-primary); font-weight:600;">Checkout</span>
+      </nav>
+
+      <!-- Order Confirmation View (Initially Hidden) -->
+      <section id="checkout-success-view" class="order-success-card hidden">
+        <div class="order-success__icon">✓</div>
+        <h1 style="font-family: var(--font-heading); color: var(--color-deep-olive); margin-bottom: var(--space-2);">
+          Order Placed Successfully!
+        </h1>
+        <p class="text-secondary" style="margin-bottom: var(--space-4);">
+          Thank you for choosing Sri Kamatchi Amman Traders. Your order has been recorded in our store management system.
+        </p>
+
+        <div>
+          <span class="order-success__id-badge" id="success-order-id">Order #------</span>
+        </div>
+
+        <div style="background-color: var(--color-warm-cream); border-radius: var(--radius-lg); padding: var(--space-4); margin: var(--space-4) 0 var(--space-6); text-align: left; font-size: var(--text-sm);">
+          <p><strong>Customer:</strong> <span id="success-customer-name"></span></p>
+          <p><strong>Delivery Contact:</strong> <span id="success-phone"></span></p>
+          <p><strong>Shipping To:</strong> <span id="success-address"></span></p>
+          <p><strong>Payment Mode:</strong> Cash on Delivery (Payment on arrival)</p>
+          <p><strong>Total Amount:</strong> <span id="success-total" style="font-weight:700; color:var(--color-deep-olive);"></span></p>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: var(--space-3); max-width: 320px; margin: 0 auto;">
+          <a href="index.html" class="btn btn--primary">
+            ← Continue Shopping
+          </a>
+          <button type="button" class="btn btn--whatsapp hidden" id="success-btn-whatsapp">
+            💬 Send Confirmation via WhatsApp
+          </button>
+        </div>
+      </section>
+
+      <!-- Active Checkout Flow Grid -->
+      <div id="checkout-main-grid" class="checkout-grid">
+        
+        <!-- Left: Customer Details & Address Form -->
+        <div class="checkout-form-column">
+          
+          <!-- Authentication Status Banner -->
+          <div class="checkout-auth-box" id="checkout-auth-banner">
+            <div>
+              <p class="font-semibold" style="color: var(--color-deep-olive); margin-bottom: 2px;">
+                Account Verification
+              </p>
+              <p class="checkout-auth-box__text" id="checkout-auth-status-text">
+                Please sign in with Google to create a verified order tied to your account.
+              </p>
+            </div>
+            <div>
+              <button type="button" class="btn btn--primary btn--sm" id="checkout-btn-google-login">
+                Sign in with Google
+              </button>
+            </div>
+          </div>
+
+          <!-- Checkout Form -->
+          <form id="checkout-form" novalidate>
+            
+            <!-- Delivery Details Card -->
+            <div class="checkout-card">
+              <h2 class="checkout-card__title">
+                <span>📍</span> Delivery Information
+              </h2>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="checkout-name">Full Name <span class="required">*</span></label>
+                  <input type="text" id="checkout-name" class="form-input" placeholder="e.g. Senthil Kumar" required />
+                  <span class="form-error-hint hidden" id="err-name">Please enter your full name.</span>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="checkout-phone">Mobile Number (+91) <span class="required">*</span></label>
+                  <input type="tel" id="checkout-phone" class="form-input" placeholder="10-digit mobile (e.g. 9840012345)" required maxlength="10" />
+                  <span class="form-error-hint hidden" id="err-phone">Please enter a valid 10-digit Indian mobile number.</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="checkout-email">Email Address</label>
+                <input type="email" id="checkout-email" class="form-input" placeholder="name@example.com" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="checkout-address1">Street Address / Door No. / Building <span class="required">*</span></label>
+                <input type="text" id="checkout-address1" class="form-input" placeholder="e.g. 14/B, Gandhi Road" required />
+                <span class="form-error-hint hidden" id="err-address1">Please enter your delivery street address.</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="checkout-address2">Landmark / Area (Optional)</label>
+                <input type="text" id="checkout-address2" class="form-input" placeholder="Near Temple / Opposite Bank" />
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="checkout-city">City / Town <span class="required">*</span></label>
+                  <input type="text" id="checkout-city" class="form-input" value="Chennai" required />
+                  <span class="form-error-hint hidden" id="err-city">Please enter your city.</span>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="checkout-state">State <span class="required">*</span></label>
+                  <input type="text" id="checkout-state" class="form-input" value="Tamil Nadu" readonly style="background-color: var(--color-gray-100);" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="checkout-pincode">Postal PIN Code (6 Digits) <span class="required">*</span></label>
+                <input type="text" id="checkout-pincode" class="form-input" placeholder="e.g. 600028" required maxlength="6" />
+                <span class="form-error-hint hidden" id="err-pincode">Please enter a valid 6-digit Indian PIN code.</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="checkout-notes">Delivery Instructions / Order Notes (Optional)</label>
+                <textarea id="checkout-notes" class="form-textarea" rows="2" placeholder="e.g. Please deliver in the morning"></textarea>
+              </div>
+            </div>
+
+            <!-- Payment Mode Card -->
+            <div class="checkout-card">
+              <h2 class="checkout-card__title">
+                <span>💳</span> Payment Method
+              </h2>
+
+              <div style="display:flex; align-items:center; gap:var(--space-3); padding:var(--space-3); border:2px solid var(--color-deep-olive); border-radius:var(--radius-lg); background-color:var(--color-warm-cream);">
+                <input type="radio" name="payment_mode" id="pay-cod" value="cash_on_delivery" checked style="width:18px; height:18px; accent-color:var(--color-deep-olive);" />
+                <label for="pay-cod" style="font-size:var(--text-sm); font-weight:600; cursor:pointer;">
+                  Cash on Delivery (Pay upon delivery)
+                </label>
+              </div>
+
+              <p class="text-xs text-muted" style="margin-top: var(--space-3);">
+                ℹ️ Online payment gateway (Razorpay UPI / Cards / Net Banking) integration is planned for Phase 5. Currently orders are verified and dispatched for Cash on Delivery across Tamil Nadu.
+              </p>
+            </div>
+
+          </form>
+
+        </div>
+
+        <!-- Right: Order Summary Column -->
+        <div class="checkout-summary-column">
+          <div class="checkout-card checkout-summary">
+            
+            <h2 class="checkout-card__title">
+              <span>🧾</span> Order Summary
+            </h2>
+
+            <!-- Sample items warning if present in cart -->
+            <div id="checkout-sample-warning" class="cart-drawer__sample-alert hidden" style="margin-bottom: var(--space-4); border-radius: var(--radius-md);">
+              ⚠️ <strong>Action Required:</strong> Your cart contains sample demonstration items. Demonstration items cannot be placed as live orders. Please remove them to proceed.
+            </div>
+
+            <!-- Empty cart warning -->
+            <div id="checkout-empty-warning" class="cart-drawer__empty hidden" style="padding: var(--space-6) 0;">
+              <p>Your cart is empty. Please add products from the storefront to proceed.</p>
+              <a href="index.html#products-section" class="btn btn--secondary btn--sm" style="margin-top: var(--space-3);">Explore Oils</a>
+            </div>
+
+            <!-- Item list -->
+            <div id="checkout-items-list" style="margin-bottom: var(--space-4); max-height: 280px; overflow-y: auto;">
+              <!-- Items rendered dynamically -->
+            </div>
+
+            <!-- Totals -->
+            <div class="checkout-totals-row">
+              <span>Items Subtotal</span>
+              <span id="checkout-subtotal" class="font-semibold">₹0</span>
+            </div>
+            <div class="checkout-totals-row">
+              <span>Delivery Fee</span>
+              <span id="checkout-delivery">₹0</span>
+            </div>
+            <div class="checkout-totals-row checkout-totals-row--grand">
+              <span>Grand Total</span>
+              <span id="checkout-grand-total" style="color:var(--color-deep-olive);">₹0</span>
+            </div>
+
+            <!-- Submit Button -->
+            <div style="margin-top: var(--space-6); display: flex; flex-direction: column; gap: var(--space-3);">
+              <button type="button" class="btn btn--primary" id="btn-submit-order" style="width: 100%;">
+                Confirm & Place Order
+              </button>
+
+              <button type="button" class="btn btn--whatsapp hidden" id="btn-checkout-whatsapp" style="width: 100%;">
+                💬 Order via WhatsApp (No Login Required)
+              </button>
+            </div>
+
+            <!-- Architecture Security Limitation Transparency -->
+            <div class="security-notice-box">
+              <strong>🔒 Security Foundation Note:</strong> Order ownership is enforced via Firestore Security Rules (order `userId` must match verified Google Auth UID). Prices and stock are client-verified against live catalog documents prior to submission. Server-side payment verification via Cloud Functions will be added in Phase 5.
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- FOOTER                                                   -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <footer class="footer" style="background-color: var(--color-surface); border-top: 1px solid var(--color-gray-200); padding: var(--space-12) 0 var(--space-8);">
+    <div class="container text-center">
+      <p style="font-weight: 700; color: var(--color-deep-olive); margin-bottom: var(--space-2);">
+        🛢️ Sri Kamatchi Amman Traders
+      </p>
+      <p class="text-sm text-secondary" style="max-width: 500px; margin: 0 auto var(--space-4);">
+        Traditional cold-pressed cooking oils serving families across Tamil Nadu.
+      </p>
+      <p class="text-xs text-muted">
+        © 2026 Sri Kamatchi Amman Traders. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script type="module" src="js/checkout.js"></script>
+</body>
+</html>
+

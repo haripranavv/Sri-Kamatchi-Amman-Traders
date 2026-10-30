@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Product Details — Sri Kamatchi Amman Traders authentic cold-pressed cooking oils." />
+  <title>Product Details — Sri Kamatchi Amman Traders</title>
+
+  <!-- Google Fonts: Outfit (English) + Noto Sans Tamil -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>🛢️</text></svg>" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/cart.css" />
+  <link rel="stylesheet" href="css/product.css" />
+
+  <style>
+    .hidden { display: none !important; }
+  </style>
+</head>
+
+<body>
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- NAVBAR                                                   -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="navbar__inner">
+      <!-- Brand -->
+      <a href="index.html" class="navbar__brand" id="nav-brand">
+        <span class="navbar__brand-icon" aria-hidden="true">🛢️</span>
+        <span>Sri Kamatchi Amman</span>
+      </a>
+
+      <!-- Nav Links -->
+      <div class="navbar__nav" id="nav-links">
+        <a href="index.html#hero" class="navbar__link">Home</a>
+        <a href="index.html#products-section" class="navbar__link navbar__link--active">Products</a>
+        <a href="index.html#categories-section" class="navbar__link">Categories</a>
+        <a href="index.html#about-section" class="navbar__link">About</a>
+      </div>
+
+      <!-- Auth Actions & Cart -->
+      <div class="navbar__actions" id="nav-auth-actions">
+        <!-- Cart Trigger Button -->
+        <button class="navbar__cart-btn" id="nav-cart-btn" aria-label="Shopping Cart" data-action="open-cart">
+          <span aria-hidden="true">🛒</span>
+          <span class="navbar__cart-badge is-zero" id="nav-cart-badge">0</span>
+        </button>
+
+        <!-- Signed Out: Show Sign In button -->
+        <button class="btn btn--primary btn--sm" id="nav-sign-in-btn">
+          Sign in with Google
+        </button>
+
+        <!-- Signed In: Show User Menu -->
+        <div class="user-menu hidden" id="user-menu-container">
+          <button class="user-menu__trigger" id="user-menu-trigger" aria-haspopup="true" aria-expanded="false">
+            <img class="avatar" src="" alt="User avatar" id="user-avatar" />
+          </button>
+
+          <div class="user-menu__dropdown" id="user-menu-dropdown" role="menu">
+            <div class="user-menu__header">
+              <p class="user-menu__name" id="user-name"></p>
+              <p class="user-menu__email" id="user-email"></p>
+              <span class="dashboard-card__badge dashboard-card__badge--admin hidden" id="user-role-badge" style="margin-top:6px; display:inline-block;"></span>
+            </div>
+
+            <a href="admin.html" class="user-menu__item hidden" id="user-menu-admin-link" role="menuitem">
+              ⚙️ Admin Portal
+            </a>
+
+            <div class="user-menu__divider"></div>
+
+            <button class="user-menu__item user-menu__item--danger" id="sign-out-btn" role="menuitem">
+              🚪 Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- MAIN CONTENT CONTAINER                                   -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <main class="product-detail-page">
+    <div class="container">
+      
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="index.html" class="breadcrumb__link">Home</a>
+        <span class="breadcrumb__sep">/</span>
+        <a href="index.html#products-section" class="breadcrumb__link">Products</a>
+        <span class="breadcrumb__sep">/</span>
+        <span id="breadcrumb-product-name" style="color:var(--color-text-primary); font-weight:600;">Loading...</span>
+      </nav>
+
+      <!-- Loading State -->
+      <div id="product-loading" class="text-center" style="padding: var(--space-16) 0;">
+        <div class="loading-spinner" style="margin: 0 auto var(--space-4);"></div>
+        <p class="text-muted">Loading product details...</p>
+      </div>
+
+      <!-- Error / Not Found State -->
+      <div id="product-error" class="product-error-state hidden">
+        <div class="product-error-state__icon">🔍</div>
+        <h2 style="margin-bottom: var(--space-2); color: var(--color-deep-olive);">Product Not Found</h2>
+        <p class="text-muted" id="product-error-msg" style="margin-bottom: var(--space-6);">
+          We couldn't locate the requested cooking oil in our catalog.
+        </p>
+        <a href="index.html#products-section" class="btn btn--primary">
+          ← Return to Storefront
+        </a>
+      </div>
+
+      <!-- Main Product View (Populated dynamically) -->
+      <div id="product-content" class="product-detail-grid hidden">
+        
+        <!-- Gallery Column -->
+        <div class="product-gallery">
+          <div class="product-gallery__main-wrap">
+            <img id="product-main-image" src="assets/images/placeholders/product-placeholder.webp" alt="Cooking Oil" class="product-gallery__main-img" />
+            <div class="product-gallery__badge" id="product-badges-container">
+              <!-- Badges injected here -->
+            </div>
+          </div>
+          <div class="product-gallery__thumbs" id="product-thumbs-container">
+            <!-- Thumbnail strip if multiple images -->
+          </div>
+        </div>
+
+        <!-- Product Information Column -->
+        <div class="product-info">
+          
+          <div class="product-info__header">
+            <span class="product-info__category" id="product-category-text">OIL</span>
+            <h1 class="product-info__title" id="product-title-text">Product Title</h1>
+            <p class="product-info__title-tamil" id="product-title-tamil"></p>
+            
+            <div class="product-info__ratings">
+              <span class="product-info__stars" id="product-stars">★★★★★</span>
+              <span class="product-info__review-count" id="product-rating-text">4.8 (24 reviews)</span>
+            </div>
+          </div>
+
+          <!-- Price & Discount Box -->
+          <div class="product-info__price-box">
+            <span class="product-info__current-price" id="product-display-price">₹0</span>
+            <span class="product-info__original-price hidden" id="product-original-price"></span>
+            <span class="product-info__discount-badge hidden" id="product-discount-badge"></span>
+            <span class="product-info__sku" id="product-sku">SKU: ---</span>
+          </div>
+
+          <!-- Demo Sample Warning if applicable -->
+          <div id="product-demo-alert" class="cart-drawer__sample-alert hidden" style="border-radius: var(--radius-md);">
+            ℹ️ <strong>Demonstration Sample:</strong> This is a sample product used for previewing storefront features. It cannot be purchased as a live order.
+          </div>
+
+          <!-- Variant Size Selector -->
+          <div class="variant-selector">
+            <div class="variant-selector__label">
+              <span>Select Quantity / Size:</span>
+              <span class="variant-selector__stock-status" id="product-stock-status">In Stock</span>
+            </div>
+            <div class="variant-selector__options" id="variant-pills-container">
+              <!-- Variant pills injected here -->
+            </div>
+          </div>
+
+          <!-- Add to Cart & WhatsApp Actions -->
+          <div class="product-actions">
+            <div class="product-actions__row">
+              <!-- Quantity Stepper -->
+              <div class="product-actions__qty">
+                <button type="button" class="product-actions__qty-btn" id="btn-qty-minus" aria-label="Decrease quantity">−</button>
+                <span class="product-actions__qty-val" id="product-qty-val">1</span>
+                <button type="button" class="product-actions__qty-btn" id="btn-qty-plus" aria-label="Increase quantity">+</button>
+              </div>
+
+              <!-- Add to Cart CTA -->
+              <button type="button" class="btn btn--primary product-actions__btn-cart" id="btn-add-to-cart">
+                🛒 Add to Cart
+              </button>
+            </div>
+
+            <!-- WhatsApp Direct Enquiry -->
+            <button type="button" class="btn btn--whatsapp product-actions__btn-whatsapp" id="btn-whatsapp-enquire">
+              💬 Enquire / Order on WhatsApp
+            </button>
+          </div>
+
+          <!-- Description & Nutritional Details -->
+          <div class="product-tabs">
+            <div>
+              <h3 class="product-section-title">About this Oil</h3>
+              <p class="text-secondary" id="product-description" style="line-height: var(--leading-relaxed);"></p>
+            </div>
+
+            <div>
+              <h3 class="product-section-title">Traditional Extraction & Purity</h3>
+              <p class="text-secondary" style="line-height: var(--leading-relaxed);">
+                Extracted using authentic wood-pressed (Vagai Mara Chekku) techniques at ambient temperatures below 40°C. 
+                Zero chemical refining, zero additives, and zero synthetic preservatives. Contains natural antioxidants and micro-nutrients.
+              </p>
+            </div>
+
+            <div>
+              <h3 class="product-section-title">Nutritional Information</h3>
+              <table class="nutrition-table">
+                <tbody>
+                  <tr>
+                    <th>Energy</th>
+                    <td id="nutrition-calories">884 kcal / 100ml</td>
+                  </tr>
+                  <tr>
+                    <th>Total Fat</th>
+                    <td id="nutrition-fat">100g</td>
+                  </tr>
+                  <tr>
+                    <th>Saturated Fatty Acids</th>
+                    <td id="nutrition-sat-fat">14g</td>
+                  </tr>
+                  <tr>
+                    <th>Extraction Method</th>
+                    <td>Traditional Cold Press (Wood-pressed)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- FOOTER                                                   -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <footer class="footer" style="background-color: var(--color-surface); border-top: 1px solid var(--color-gray-200); padding: var(--space-12) 0 var(--space-8);">
+    <div class="container text-center">
+      <p style="font-weight: 700; color: var(--color-deep-olive); margin-bottom: var(--space-2);">
+        🛢️ Sri Kamatchi Amman Traders
+      </p>
+      <p class="text-sm text-secondary" style="max-width: 500px; margin: 0 auto var(--space-4);">
+        Wholesome traditional cold-pressed cooking oils serving families across Tamil Nadu.
+      </p>
+      <p class="text-xs text-muted">
+        © 2026 Sri Kamatchi Amman Traders. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script type="module" src="js/product.js"></script>
+</body>
+</html>
+

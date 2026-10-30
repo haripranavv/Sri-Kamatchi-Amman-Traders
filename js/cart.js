@@ -1,34 +1,324 @@
 /**
- * cart.js — Shopping Cart Module (Stub)
+ * cart.js — Shopping Cart Management Module
  * 
- * Will manage the shopping cart state, add/remove items, quantity updates,
- * and cart persistence (localStorage + Firestore sync).
- * @todo Implement in Phase 2: Storefront
+ * Manages client-side shopping cart state with:
+ * - Deterministic item keying: `${productId}__${variantId}`
+ * - Automatic merging of matching product variants
+ * - Quantity update and stock boundary checks
+ * - Safe persistence in localStorage (`skat_cart_v1`)
+ * - Live event broadcast via 'skat:cart-updated' for reactive UI sync
+ * - Clear segregation and warning flags for demonstration sample products
  */
 
-/** @todo Implement: Add item to cart */
-export function addToCart(/* productId, quantity, size */) {
-  console.warn('[Cart] addToCart() is not yet implemented.');
+import { STORE_CONFIG } from './config.js';
+
+const STORAGE_KEY = 'skat_cart_v1';
+
+/**
+ * Generate a deterministic composite key for a product variant.
+ * 
+ * @param {string} productId
+ * @param {string} variantId
+ * @returns {string}
+ */
+export function getCartItemKey(productId, variantId) {
+  const pId = String(productId || '').trim();
+  const vId = String(variantId || 'default').trim();
+  return `${pId}__${vId}`;
 }
 
-/** @todo Implement: Remove item from cart */
-export function removeFromCart(/* productId */) {
-  console.warn('[Cart] removeFromCart() is not yet implemented.');
+/**
+ * Load cart items from localStorage.
+ * Handles parsing errors gracefully.
+ * 
+ * @returns {Array<Object>}
+ */
+export function getCart() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.warn('[Cart] Failed to read cart from localStorage, initializing empty:', error);
+    return [];
+  }
 }
 
-/** @todo Implement: Get cart items */
+/**
+ * Alias for getCart() to preserve architecture plan naming.
+ * @returns {Array<Object>}
+ */
 export function getCartItems() {
-  console.warn('[Cart] getCartItems() is not yet implemented.');
-  return [];
+  return getCart();
 }
 
-/** @todo Implement: Get cart total */
-export function getCartTotal() {
-  console.warn('[Cart] getCartTotal() is not yet implemented.');
-  return 0;
+/**
+ * Persist cart items to localStorage and emit 'skat:cart-updated' event.
+ * 
+ * @param {Array<Object>} items
+ */
+function saveCart(items) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  } catch (error) {
+    console.error('[Cart] Failed to save cart to localStorage:', error);
+  }
+
+  // Calculate summary metrics for the broadcast event
+  const count = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+  const subtotal = items.reduce((sum, item) => sum + ((Number(item.unitPrice) || 0) * (Number(item.quantity) || 0)), 0);
+  const deliveryCharge = items.length === 0 ? 0 : (subtotal >= STORE_CONFIG.freeDeliveryThreshold ? 0 : STORE_CONFIG.deliveryFee);
+  const total = subtotal + deliveryCharge;
+  const hasSample = items.some(i => i.isSample === true || String(i.productId).startsWith('demo-'));
+
+  const detail = {
+    items,
+    count,
+    subtotal,
+    deliveryCharge,
+    total,
+    hasSample
+  };
+
+  window.dispatchEvent(new CustomEvent('skat:cart-updated', { detail }));
 }
 
-/** @todo Implement: Clear cart */
+/**
+ * Add a product variant to the cart.
+ * If the variant already exists in the cart, its quantity is incremented.
+ * 
+ * @param {Object} product - Product record (Firestore or demo catalog)
+ * @param {Object|null} [variant] - Specific variant. If null, default variant is selected.
+ * @param {number} [quantity=1] - Quantity to add
+ * @returns {{ success: boolean, item?: Object, message?: string }}
+ */
+export function addToCart(product, variant = null, quantity = 1) {
+  if (!product || !product.id) {
+    console.error('[Cart] addToCart rejected: invalid product payload.');
+    return { success: false, message: 'Invalid product.' };
+  }
+
+  const addQty = Math.max(1, parseInt(quantity, 10) || 1);
+
+  // 1. Resolve variant
+  let selectedVariant = variant;
+  if (!selectedVariant) {
+    if (Array.isArray(product.variants) && product.variants.length > 0) {
+      selectedVariant = product.variants.find(v => v.isDefault) || product.variants[0];
+    } else {
+      selectedVariant = {
+        id: 'default',
+        variantId: 'default',
+        size: product.unit || '1L',
+        sku: `${(product.category || 'OIL').toUpperCase().slice(0, 3)}-1L`,
+        price: Number(product.price) || 0,
+        discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
+        stock: product.stock !== undefined ? Number(product.stock) : 50
+      };
+    }
+  }
+
+  const variantId = selectedVariant.variantId || selectedVariant.id || selectedVariant.sku || selectedVariant.size || 'default';
+  const itemKey = getCartItemKey(product.id, variantId);
+
+  // Determine effective unit price (discountPrice if active, else price)
+  const regularPrice = Number(selectedVariant.price) || Number(product.price) || 0;
+  const discountPrice = (selectedVariant.discountPrice && Number(selectedVariant.discountPrice) > 0 && Number(selectedVariant.discountPrice) < regularPrice)
+    ? Number(selectedVariant.discountPrice)
+    : null;
+  const unitPrice = discountPrice !== null ? discountPrice : regularPrice;
+
+  // Stock check
+  const availableStock = selectedVariant.stock !== undefined ? parseInt(selectedVariant.stock, 10) : 50;
+
+  const currentCart = getCart();
+  const existingIndex = currentCart.findIndex(item => item.key === itemKey);
+
+  let targetItem;
+
+  if (existingIndex > -1) {
+    // Merge existing item
+    const existing = currentCart[existingIndex];
+    const newQty = existing.quantity + addQty;
+
+    if (availableStock > 0 && newQty > availableStock) {
+      existing.quantity = availableStock;
+      saveCart(currentCart);
+      return {
+        success: true,
+        item: existing,
+        message: `Quantity adjusted to maximum available stock (${availableStock}).`
+      };
+    }
+
+    existing.quantity = newQty;
+    targetItem = existing;
+  } else {
+    // New cart item
+    const initialQty = availableStock > 0 ? Math.min(addQty, availableStock) : addQty;
+    const isSample = Boolean(product.isSample || String(product.id).startsWith('demo-'));
+
+    targetItem = {
+      key: itemKey,
+      productId: product.id,
+      variantId: variantId,
+      name: product.name || 'Cooking Oil',
+      nameTamil: product.nameTamil || '',
+      category: product.category || 'sesame',
+      size: selectedVariant.size || product.unit || '1L',
+      sku: selectedVariant.sku || '',
+      price: regularPrice,
+      discountPrice: discountPrice,
+      unitPrice: unitPrice,
+      quantity: initialQty,
+      stock: availableStock,
+      imageURL: product.imageURL || (Array.isArray(product.imageURLs) && product.imageURLs[0]) || STORE_CONFIG.placeholderImage,
+      isSample: isSample
+    };
+
+    currentCart.push(targetItem);
+  }
+
+  saveCart(currentCart);
+  return { success: true, item: targetItem };
+}
+
+/**
+ * Update the quantity of a cart item by its unique key.
+ * If newQuantity <= 0, the item is removed.
+ * 
+ * @param {string} itemKey - Composite key (`${productId}__${variantId}`)
+ * @param {number} newQuantity
+ * @returns {boolean}
+ */
+export function updateQuantity(itemKey, newQuantity) {
+  const qty = parseInt(newQuantity, 10);
+  const currentCart = getCart();
+  const index = currentCart.findIndex(item => item.key === itemKey);
+
+  if (index === -1) return false;
+
+  if (isNaN(qty) || qty <= 0) {
+    return removeFromCart(itemKey);
+  }
+
+  const item = currentCart[index];
+  if (item.stock > 0 && qty > item.stock) {
+    item.quantity = item.stock;
+  } else {
+    item.quantity = qty;
+  }
+
+  saveCart(currentCart);
+  return true;
+}
+
+/**
+ * Remove an item from the cart by its key.
+ * 
+ * @param {string} itemKey - Composite key (`${productId}__${variantId}`)
+ * @returns {boolean}
+ */
+export function removeFromCart(itemKey) {
+  const currentCart = getCart();
+  const updated = currentCart.filter(item => item.key !== itemKey);
+
+  if (updated.length !== currentCart.length) {
+    saveCart(updated);
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Clear all items from the cart.
+ */
 export function clearCart() {
-  console.warn('[Cart] clearCart() is not yet implemented.');
+  saveCart([]);
+}
+
+/**
+ * Return total quantity of items in the cart.
+ * @returns {number}
+ */
+export function getCartCount() {
+  const items = getCart();
+  return items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+}
+
+/**
+ * Return the raw items subtotal before delivery charges.
+ * @returns {number}
+ */
+export function getCartSubtotal() {
+  const items = getCart();
+  return items.reduce((sum, item) => sum + ((Number(item.unitPrice) || 0) * (Number(item.quantity) || 0)), 0);
+}
+
+/**
+ * Calculate applicable delivery fee based on store free delivery threshold.
+ * @returns {number}
+ */
+export function getDeliveryCharge(subtotal = null) {
+  const sub = subtotal !== null ? subtotal : getCartSubtotal();
+  if (sub <= 0) return 0;
+  return sub >= STORE_CONFIG.freeDeliveryThreshold ? 0 : STORE_CONFIG.deliveryFee;
+}
+
+/**
+ * Return grand total (subtotal + delivery fee).
+ * @returns {number}
+ */
+export function getCartTotal() {
+  const sub = getCartSubtotal();
+  if (sub <= 0) return 0;
+  return sub + getDeliveryCharge(sub);
+}
+
+/**
+ * Check whether any items in the cart are demonstration samples.
+ * @returns {boolean}
+ */
+export function hasSampleItems() {
+  return getCart().some(i => i.isSample === true || String(i.productId).startsWith('demo-'));
+}
+
+/**
+ * Register a listener for cart changes.
+ * Immediately invokes the callback with current state if immediate=true.
+ * 
+ * @param {Function} callback
+ * @param {boolean} [immediate=false]
+ * @returns {Function} Unsubscribe function
+ */
+export function onCartChange(callback, immediate = false) {
+  const handler = (e) => {
+    callback(e.detail || {
+      items: getCart(),
+      count: getCartCount(),
+      subtotal: getCartSubtotal(),
+      deliveryCharge: getDeliveryCharge(),
+      total: getCartTotal(),
+      hasSample: hasSampleItems()
+    });
+  };
+
+  window.addEventListener('skat:cart-updated', handler);
+
+  if (immediate) {
+    const items = getCart();
+    const subtotal = getCartSubtotal();
+    const deliveryCharge = getDeliveryCharge(subtotal);
+    callback({
+      items,
+      count: getCartCount(),
+      subtotal,
+      deliveryCharge,
+      total: subtotal + deliveryCharge,
+      hasSample: hasSampleItems()
+    });
+  }
+
+  return () => window.removeEventListener('skat:cart-updated', handler);
 }

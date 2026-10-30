@@ -190,15 +190,22 @@ function normalizeProductData(rawData) {
         }
       ];
 
-  // Clean and sanitize each variant
+  // Clean, sanitize, and assign deterministic unique variant IDs
   let hasDefault = false;
   variants = variants.map((v, index) => {
     const isDefault = v.isDefault === true || (!hasDefault && index === 0);
     if (isDefault) hasDefault = true;
 
+    const cleanSize = (v.size || '1L').trim();
+    const cleanSku = (v.sku || '').trim().toUpperCase();
+    const sizeSlug = cleanSize.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const variantId = v.id || v.variantId || (cleanSku ? cleanSku.toLowerCase() : `var-${sizeSlug || index + 1}`);
+
     return {
-      size: (v.size || '1L').trim(),
-      sku: (v.sku || '').trim().toUpperCase(),
+      id: variantId,
+      variantId: variantId,
+      size: cleanSize,
+      sku: cleanSku || `${(rawData.category || 'OIL').toUpperCase().slice(0, 3)}-${cleanSize.toUpperCase()}`,
       price: Math.max(0, Number(v.price) || 0),
       discountPrice: v.discountPrice && Number(v.discountPrice) > 0 ? Number(v.discountPrice) : null,
       stock: Math.max(0, parseInt(v.stock, 10) || 0),
@@ -281,6 +288,29 @@ export async function getProducts(options = {}) {
     return products;
   } catch (error) {
     console.error('[Firestore] getProducts error:', error);
+    throw error;
+  }
+}
+
+
+/**
+ * Fetch a single product document by its Firestore document ID.
+ * 
+ * @param {string} productId
+ * @returns {Promise<Object|null>}
+ */
+export async function getProductById(productId) {
+  if (!db || !productId) return null;
+
+  try {
+    const productRef = doc(db, 'products', productId);
+    const snap = await getDoc(productRef);
+    if (snap.exists()) {
+      return { id: snap.id, ...snap.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error(`[Firestore] getProductById(${productId}) error:`, error);
     throw error;
   }
 }
@@ -505,14 +535,183 @@ export async function updateOrderStatus(orderId, status) {
 // STUBS FOR FUTURE PHASES
 // ═══════════════════════════════════════════════
 
-export async function createOrder(/* orderData */) {
-  console.warn('[Firestore] createOrder() is part of Phase 4: Commerce.');
-  return null;
+// ═══════════════════════════════════════════════
+// ORDERS (Phase 4: Real Order Creation & History)
+// ═══════════════════════════════════════════════
+
+/**
+ * Create a new customer order in Firestore.
+ * 
+ * SECURITY & INTEGRITY CHECKS:
+ * 1. Requires authenticated user matching orderData.userId (enforced by Security Rules).
+ * 2. Strict rejection of demonstration sample products. Real purchases must reference real products.
+ * 3. Client re-verifies product prices and active statuses against Firestore live snapshots
+ *    before calculating the subtotal and total, mitigating casual localStorage tampering.
+ * 4. Architectural Note: Full production-level tamper protection against arbitrary client SDK calls
+ *    requires a server-side Cloud Function to authoritatively sign prices and capture payments.
+ * 5. Initial status is always 'placed' and paymentStatus is 'pending'.
+ * 
+ * @param {Object} orderData
+ * @returns {Promise<Object>} The created order record with Firestore ID.
+ */
+export async function createOrder(orderData) {
+  if (!db) throw new Error('Firestore is not initialized.');
+  if (!orderData || !orderData.userId) {
+    throw new Error('User authentication is required to place an order.');
+  }
+
+  const items = Array.isArray(orderData.items) ? orderData.items : [];
+  if (items.length === 0) {
+    throw new Error('Cannot create an order with an empty cart.');
+  }
+
+  // 1. Guard against demo sample products
+  for (const item of items) {
+    if (String(item.productId).startsWith('demo-') || item.isSample === true) {
+      throw new Error(
+        `"${item.name || 'Sample item'}" is a demonstration sample product and cannot be purchased as a real order. Please add products from the live catalog.`
+      );
+    }
+  }
+
+  // 2. Client-side price verification against live Firestore product documents
+  let verifiedSubtotal = 0;
+  const verifiedItems = [];
+
+  for (const item of items) {
+    const productDoc = await getProductById(item.productId);
+    if (!productDoc) {
+      throw new Error(`Product "${item.name || item.productId}" is no longer available in the store catalog.`);
+    }
+    if (!productDoc.isActive) {
+      throw new Error(`Product "${productDoc.name}" is currently inactive and cannot be ordered.`);
+    }
+
+    // Match variant by variantId or sku or size
+    const variants = Array.isArray(productDoc.variants) && productDoc.variants.length > 0
+      ? productDoc.variants
+      : [{
+          id: 'default',
+          variantId: 'default',
+          size: productDoc.unit || '1L',
+          price: productDoc.price || 0,
+          discountPrice: productDoc.discountPrice || null,
+          stock: productDoc.stock || 0
+        }];
+
+    const matchedVariant = variants.find(v => 
+      (item.variantId && (v.variantId === item.variantId || v.id === item.variantId)) ||
+      (item.sku && v.sku === item.sku) ||
+      (item.size && v.size === item.size)
+    ) || variants[0];
+
+    // Determine unit price
+    const unitPrice = (matchedVariant.discountPrice && matchedVariant.discountPrice > 0 && matchedVariant.discountPrice < matchedVariant.price)
+      ? matchedVariant.discountPrice
+      : matchedVariant.price;
+
+    const qty = Math.max(1, parseInt(item.quantity, 10) || 1);
+    const lineTotal = unitPrice * qty;
+    verifiedSubtotal += lineTotal;
+
+    verifiedItems.push({
+      productId: item.productId,
+      variantId: matchedVariant.variantId || matchedVariant.id || matchedVariant.size,
+      sku: matchedVariant.sku || '',
+      size: matchedVariant.size || '1L',
+      name: productDoc.name,
+      nameTamil: productDoc.nameTamil || '',
+      unitPrice: unitPrice,
+      originalPrice: matchedVariant.price,
+      quantity: qty,
+      lineTotal: lineTotal,
+      imageURL: productDoc.imageURL || (Array.isArray(productDoc.imageURLs) && productDoc.imageURLs[0]) || ''
+    });
+  }
+
+  // 3. Compute delivery charge & total based on verified subtotal
+  const deliveryCharge = verifiedSubtotal >= 999 ? 0 : 40;
+  const verifiedTotal = verifiedSubtotal + deliveryCharge;
+
+  const orderPayload = {
+    userId: orderData.userId,
+    userEmail: orderData.userEmail || '',
+    customerName: (orderData.customerName || '').trim(),
+    phone: (orderData.phone || '').trim(),
+    deliveryAddress: {
+      addressLine1: (orderData.deliveryAddress?.addressLine1 || '').trim(),
+      addressLine2: (orderData.deliveryAddress?.addressLine2 || '').trim(),
+      city: (orderData.deliveryAddress?.city || 'Chennai').trim(),
+      state: (orderData.deliveryAddress?.state || 'Tamil Nadu').trim(),
+      pincode: (orderData.deliveryAddress?.pincode || '').trim()
+    },
+    items: verifiedItems,
+    subtotal: verifiedSubtotal,
+    deliveryCharge: deliveryCharge,
+    total: verifiedTotal,
+    notes: (orderData.notes || '').trim(),
+    status: 'placed',               // placed | confirmed | shipped | delivered | cancelled
+    paymentStatus: 'pending',        // pending (cash on delivery / store coordination)
+    paymentMethod: orderData.paymentMethod || 'cash_on_delivery',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  };
+
+  try {
+    const ordersRef = collection(db, 'orders');
+    const docRef = await addDoc(ordersRef, orderPayload);
+    console.log('[Firestore] Created order with ID:', docRef.id);
+    return {
+      id: docRef.id,
+      ...orderPayload
+    };
+  } catch (error) {
+    console.error('[Firestore] createOrder error:', error);
+    if (error.code === 'permission-denied') {
+      throw new Error('Permission denied: You must be signed in to create an order.');
+    }
+    throw error;
+  }
 }
 
-export async function getUserOrders(/* userId */) {
-  console.warn('[Firestore] getUserOrders() is part of Phase 4: Commerce.');
-  return [];
+/**
+ * Fetch orders for a specific user ID.
+ * 
+ * @param {string} userId
+ * @returns {Promise<Array<Object>>}
+ */
+export async function getUserOrders(userId) {
+  if (!db || !userId) return [];
+
+  try {
+    const ordersRef = collection(db, 'orders');
+    const q = query(
+      ordersRef,
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc'),
+      limit(50)
+    );
+    const snap = await getDocs(q);
+    const orders = [];
+    snap.forEach(d => orders.push({ id: d.id, ...d.data() }));
+    return orders;
+  } catch (error) {
+    // If compound index is building or not available, query without orderBy
+    try {
+      const fallbackQuery = query(collection(db, 'orders'), where('userId', '==', userId));
+      const snap = await getDocs(fallbackQuery);
+      const orders = [];
+      snap.forEach(d => orders.push({ id: d.id, ...d.data() }));
+      return orders.sort((a, b) => {
+        const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+        const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        return timeB - timeA;
+      });
+    } catch (fallbackErr) {
+      console.warn('[Firestore] getUserOrders error:', fallbackErr.message);
+      return [];
+    }
+  }
 }
 
 export async function getProductReviews(/* productId */) {

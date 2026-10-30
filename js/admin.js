@@ -535,6 +535,9 @@ function addVariantRow(data = {}) {
 
   const row = document.createElement('div');
   row.classList.add('variant-row');
+  if (data.id || data.variantId) {
+    row.setAttribute('data-variant-id', data.variantId || data.id);
+  }
 
   const rowId = 'variant_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
 
@@ -635,7 +638,11 @@ function getVariantsFromForm() {
     const isDefault = row.querySelector('.variant-default')?.checked || false;
 
     if (size && price >= 0) {
+      const existingId = row.getAttribute('data-variant-id');
+      const variantId = existingId || sku.toLowerCase() || `var-${size.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
       variants.push({
+        id: variantId,
+        variantId: variantId,
         size,
         sku: sku || `OIL-${size.toUpperCase()}`,
         price,

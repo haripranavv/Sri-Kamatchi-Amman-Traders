@@ -205,6 +205,23 @@ Once authorized, open `/admin.html` or click **⚙️ Admin Portal** in the stor
 
 ---
 
+## WhatsApp Ordering & Business Configuration
+
+To configure your business WhatsApp phone number for direct customer enquiries and WhatsApp orders:
+
+1. Open `js/config.js`.
+2. Locate `whatsappPhone` under `STORE_CONFIG`:
+   ```javascript
+   export const STORE_CONFIG = {
+     storeName: 'Sri Kamatchi Amman Traders',
+     // Set your official business WhatsApp number with country code (e.g., '919840012345'):
+     whatsappPhone: '', // ← Enter your 10+ digit WhatsApp number here
+   ```
+3. When left empty (`""`), all WhatsApp order and enquiry buttons across the website are safely disabled with a notice informing customers that WhatsApp ordering is unconfigured.
+4. When populated with an Indian number (e.g. `91XXXXXXXXXX`), one-click WhatsApp order and enquiry buttons become active with pre-formatted product and cart details.
+
+---
+
 ## Local Product Image Asset Management
 
 To avoid requiring a paid Firebase Blaze plan for Firebase Storage, product images are served as static files directly through Firebase Hosting:

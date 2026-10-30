@@ -14,6 +14,7 @@ import { initAuthObserver, signInWithGoogle, signOut, onAuthChange, getCurrentUs
 import { sanitizeHTML, $ } from './utils.js';
 import { renderStorefront } from './home.js';
 import { initAnimations } from './animations.js';
+import { initCartUI } from './cart-ui.js';
 
 
 // ── DOM References ──
@@ -274,6 +275,9 @@ function init() {
 
   // Step 3: Populate storefront components immediately
   renderStorefront();
+
+  // Initialize shopping cart drawer & badge
+  initCartUI();
 
   // Step 4: Initialize auth observer — fires callback once initial auth state resolves
   initAuthObserver((user, profile) => {
