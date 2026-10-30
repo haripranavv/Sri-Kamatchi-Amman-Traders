@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO -->
+  <title>Sri Kamatchi Amman Traders — Premium Cold-Pressed Cooking Oils</title>
+  <meta name="description" content="Premium cold-pressed cooking oils from Tamil Nadu. Sesame, coconut, groundnut, and more — crafted with tradition, delivered fresh." />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Sri Kamatchi Amman Traders — Premium Cooking Oils" />
+  <meta property="og:description" content="Cold-pressed cooking oils from Tamil Nadu. Sesame, coconut, groundnut and more." />
+  <meta property="og:type" content="website" />
+
+  <!-- Favicon placeholder -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>🛢️</text></svg>" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/home.css" />
+
+  <!-- GSAP CDN (animation library) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+
+  <style>
+    .hidden { display: none !important; }
+  </style>
+</head>
+
+<body>
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- NAVBAR                                                   -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="navbar__inner">
+      <!-- Brand -->
+      <a href="index.html" class="navbar__brand" id="nav-brand">
+        <span class="navbar__brand-icon" aria-hidden="true">🛢️</span>
+        <span>Sri Kamatchi Amman</span>
+      </a>
+
+      <!-- Nav Links -->
+      <div class="navbar__nav" id="nav-links">
+        <a href="#hero" class="navbar__link navbar__link--active">Home</a>
+        <a href="#products-section" class="navbar__link">Products</a>
+        <a href="#categories-section" class="navbar__link">Categories</a>
+        <a href="#about-section" class="navbar__link">About</a>
+      </div>
+
+      <!-- Auth Actions -->
+      <div class="navbar__actions" id="nav-auth-actions">
+        <!-- Signed Out: Show Sign In button -->
+        <button class="btn btn--primary btn--sm" id="nav-sign-in-btn">
+          Sign in with Google
+        </button>
+
+        <!-- Signed In: Show User Menu -->
+        <div class="user-menu hidden" id="user-menu-container">
+          <button class="user-menu__trigger" id="user-menu-trigger" aria-haspopup="true" aria-expanded="false">
+            <img class="avatar" src="" alt="User avatar" id="user-avatar" />
+          </button>
+
+          <div class="user-menu__dropdown" id="user-menu-dropdown" role="menu">
+            <div class="user-menu__header">
+              <p class="user-menu__name" id="user-name"></p>
+              <p class="user-menu__email" id="user-email"></p>
+              <span class="dashboard-card__badge dashboard-card__badge--admin hidden" id="user-role-badge" style="margin-top:6px; display:inline-block;"></span>
+            </div>
+
+            <button class="user-menu__item" id="user-menu-profile-btn" role="menuitem">
+              👤 My Profile
+            </button>
+            <button class="user-menu__item" role="menuitem" disabled>
+              📦 My Orders
+            </button>
+            <a href="admin.html" class="user-menu__item hidden" id="user-menu-admin-link" role="menuitem">
+              ⚙️ Admin Portal
+            </a>
+
+            <div class="user-menu__divider"></div>
+
+            <button class="user-menu__item user-menu__item--danger" id="sign-out-btn" role="menuitem">
+              🚪 Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- APP CONTENT                                              -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <main class="main-content" id="app">
+
+    <!-- ── Loading Screen ── -->
+    <div class="auth-screen" id="loading-screen">
+      <div class="auth-screen__icon auth-screen__icon--loading">
+        <div class="spinner"></div>
+      </div>
+      <h2 class="auth-screen__title">Loading...</h2>
+      <p class="auth-screen__subtitle">
+        Setting up your experience. This will only take a moment.
+      </p>
+    </div>
+
+    <!-- ── Firebase Config Missing Screen ── -->
+    <div class="config-banner hidden" id="config-screen">
+      <div class="config-banner__card">
+        <div class="config-banner__icon">🔧</div>
+        <h2 class="config-banner__title">Firebase Setup Required</h2>
+        <p class="config-banner__text">
+          This app needs a Firebase project to work. Open
+          <code>js/firebase-config.js</code> and replace the placeholder
+          values with your Firebase project configuration.
+        </p>
+        <div class="config-banner__code">1. Go to console.firebase.google.com
+2. Create or select a project
+3. Add a Web app
+4. Copy the config object
+5. Paste values into js/firebase-config.js
+6. Enable Google sign-in in Authentication
+7. Create a Firestore database</div>
+        <p class="config-banner__text" style="margin-top: var(--space-6); margin-bottom: 0;">
+          See <strong>README.md</strong> for detailed setup instructions.
+        </p>
+      </div>
+    </div>
+
+    <!-- ── Welcome / Unauthenticated Screen ── -->
+    <div class="auth-screen hidden" id="welcome-screen">
+      <div class="auth-screen__icon auth-screen__icon--welcome">
+        🛢️
+      </div>
+      <h2 class="auth-screen__title">Welcome to Sri Kamatchi Amman Traders</h2>
+      <p class="auth-screen__subtitle">
+        Premium cold-pressed cooking oils, crafted with tradition and
+        delivered fresh across Tamil Nadu. Sign in to explore our collection.
+      </p>
+      <button class="btn btn--google" id="sign-in-btn-welcome">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Sign in with Google
+      </button>
+      <p class="auth-screen__footer">
+        By signing in, you agree to our Terms of Service.
+      </p>
+    </div>
+
+    <!-- ── Storefront (shown after auth resolves) ── -->
+    <div class="hidden" id="storefront-view">
+
+      <!-- ════════════════════════════════ -->
+      <!-- HERO SECTION                     -->
+      <!-- ════════════════════════════════ -->
+      <section class="hero" id="hero">
+        <div class="hero__bg-pattern"></div>
+        <div class="hero__glow hero__glow--gold animate-pulse-glow"></div>
+        <div class="hero__glow hero__glow--amber animate-pulse-glow" style="animation-delay: 2s;"></div>
+
+        <div class="hero__inner">
+          <div class="hero__content">
+            <div class="hero__badge">
+              🌿 Traditional Cold-Pressed Oils
+            </div>
+
+            <h1 class="hero__title">
+              Pure Oils From<br />
+              <span class="hero__title-accent">Tamil Nadu's Heart</span>
+            </h1>
+
+            <p class="hero__description">
+              Stone-ground and cold-pressed using traditional methods passed down
+              through generations. Experience the authentic taste of Tamil Nadu's
+              finest cooking oils.
+            </p>
+
+            <div class="hero__actions">
+              <a href="#products-section" class="btn btn--primary btn--lg">
+                🛒 Browse Collection
+              </a>
+              <a href="#about-section" class="btn btn--secondary btn--lg" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: #fff;">
+                Learn Our Story
+              </a>
+            </div>
+
+            <div class="hero__stats">
+              <div class="hero__stat">
+                <span class="hero__stat-value">6+</span>
+                <span class="hero__stat-label">Oil Varieties</span>
+              </div>
+              <div class="hero__stat">
+                <span class="hero__stat-value">100%</span>
+                <span class="hero__stat-label">Cold Pressed</span>
+              </div>
+              <div class="hero__stat">
+                <span class="hero__stat-value">TN</span>
+                <span class="hero__stat-label">Made in Tamil Nadu</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero__visual">
+            <div class="hero__oil-display">
+              <div class="hero__oil-ring"></div>
+              <div class="hero__oil-ring"></div>
+              <div class="hero__oil-circle"></div>
+              <span class="hero__oil-emoji animate-float" aria-hidden="true">🛢️</span>
+              <div class="hero__floating-drop animate-float-slow animate-float-delay-1"></div>
+              <div class="hero__floating-drop animate-float-slow animate-float-delay-2"></div>
+              <div class="hero__floating-drop animate-float-slow animate-float-delay-3"></div>
+              <div class="hero__floating-drop animate-float-slow"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════ -->
+      <!-- CATEGORIES SECTION               -->
+      <!-- ════════════════════════════════ -->
+      <section class="section" id="categories-section">
+        <div class="container">
+          <div class="section__header">
+            <span class="section__eyebrow">Our Collection</span>
+            <h2 class="section__title">Browse by Category</h2>
+            <p class="section__subtitle">
+              From traditional sesame to light sunflower — find the perfect oil for every dish.
+            </p>
+          </div>
+
+          <div class="categories-grid" id="categories-grid">
+            <!-- Rendered by home.js -->
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════ -->
+      <!-- FEATURED PRODUCTS SECTION        -->
+      <!-- ════════════════════════════════ -->
+      <section class="section section--alt" id="products-section">
+        <div class="container">
+          <div class="section__header">
+            <span class="section__eyebrow">Featured Products</span>
+            <h2 class="section__title">Our Best-Selling Oils</h2>
+            <p class="section__subtitle">
+              Hand-selected premium oils loved by families across Tamil Nadu.
+              <br /><em class="text-sm text-muted">(Sample products for demonstration purposes)</em>
+            </p>
+          </div>
+
+          <div class="products-grid" id="products-grid">
+            <!-- Rendered by home.js -->
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════ -->
+      <!-- BENEFITS / WHY CHOOSE US         -->
+      <!-- ════════════════════════════════ -->
+      <section class="section" id="about-section">
+        <div class="container">
+          <div class="section__header">
+            <span class="section__eyebrow">Why Choose Us</span>
+            <h2 class="section__title">The Sri Kamatchi Amman Difference</h2>
+            <p class="section__subtitle">
+              Quality, tradition, and trust — the pillars of our business.
+            </p>
+          </div>
+
+          <div class="benefits-grid">
+            <div class="benefit-card reveal">
+              <div class="benefit-card__icon">🏭</div>
+              <h3 class="benefit-card__title">Traditional Cold Press</h3>
+              <p class="benefit-card__text">
+                Our oils are extracted using traditional stone-grinding methods
+                that preserve natural nutrients and authentic flavour.
+              </p>
+            </div>
+
+            <div class="benefit-card reveal">
+              <div class="benefit-card__icon">🌱</div>
+              <h3 class="benefit-card__title">Naturally Pure</h3>
+              <p class="benefit-card__text">
+                No chemicals, no preservatives, no artificial additives.
+                Just pure, unrefined cooking oil the way nature intended.
+              </p>
+            </div>
+
+            <div class="benefit-card reveal">
+              <div class="benefit-card__icon">🚚</div>
+              <h3 class="benefit-card__title">Fresh to Your Door</h3>
+              <p class="benefit-card__text">
+                We deliver across Tamil Nadu so you can enjoy fresh,
+                flavourful oils without leaving your home.
+              </p>
+            </div>
+
+            <div class="benefit-card reveal">
+              <div class="benefit-card__icon">👨‍👩‍👧‍👦</div>
+              <h3 class="benefit-card__title">Family Trusted</h3>
+              <p class="benefit-card__text">
+                Families across Tamil Nadu trust our oils for their daily cooking.
+                Quality you can taste in every meal.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════ -->
+      <!-- TESTIMONIALS                     -->
+      <!-- ════════════════════════════════ -->
+      <section class="section section--alt">
+        <div class="container">
+          <div class="section__header">
+            <span class="section__eyebrow">What Our Customers Say</span>
+            <h2 class="section__title">Trusted by Tamil Nadu Families</h2>
+            <p class="section__subtitle">
+              <em class="text-sm text-muted">(Sample testimonials for demonstration purposes)</em>
+            </p>
+          </div>
+
+          <div class="testimonials-grid" id="testimonials-grid">
+            <!-- Rendered by home.js -->
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════ -->
+      <!-- CTA BANNER                       -->
+      <!-- ════════════════════════════════ -->
+      <section class="section">
+        <div class="container">
+          <div class="cta-banner reveal">
+            <h2 class="cta-banner__title">Ready to Taste the Difference?</h2>
+            <p class="cta-banner__text">
+              Join thousands of families who cook with our premium cold-pressed oils every day.
+            </p>
+            <div class="cta-banner__actions">
+              <a href="#products-section" class="btn btn--primary btn--lg">
+                Browse Products
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+    <!-- /storefront-view -->
+
+  </main>
+
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- SITE FOOTER                                              -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <footer class="site-footer" id="site-footer">
+    <div class="container">
+      <div class="site-footer__sample-notice">
+        ⚠️ This is a demonstration website. All products, prices, testimonials, and business claims are sample data only.
+      </div>
+
+      <div class="site-footer__grid">
+        <div>
+          <h3 class="site-footer__brand-name">🛢️ Sri Kamatchi Amman Traders</h3>
+          <p class="site-footer__brand-desc">
+            Premium cold-pressed cooking oils from Tamil Nadu.
+            Traditional quality, modern convenience.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="site-footer__heading">Products</h4>
+          <div class="site-footer__links">
+            <a href="#products-section" class="site-footer__link">Sesame Oil</a>
+            <a href="#products-section" class="site-footer__link">Coconut Oil</a>
+            <a href="#products-section" class="site-footer__link">Groundnut Oil</a>
+            <a href="#products-section" class="site-footer__link">All Products</a>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="site-footer__heading">Company</h4>
+          <div class="site-footer__links">
+            <a href="#about-section" class="site-footer__link">About Us</a>
+            <span class="site-footer__link">Contact</span>
+            <span class="site-footer__link">Blog</span>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="site-footer__heading">Support</h4>
+          <div class="site-footer__links">
+            <span class="site-footer__link">Shipping Info</span>
+            <span class="site-footer__link">Returns</span>
+            <span class="site-footer__link">FAQ</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="site-footer__bottom">
+        <p>&copy; 2026 Sri Kamatchi Amman Traders. All rights reserved.</p>
+        <p>Demo project — not a real store</p>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- USER PROFILE MODAL                                       -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="profile-modal" aria-hidden="true" role="dialog" aria-labelledby="profile-modal-title">
+    <div class="modal">
+      <div class="modal__header">
+        <h2 class="modal__title" id="profile-modal-title">My Account</h2>
+        <button class="modal__close" id="profile-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal__body" id="profile-modal-content">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- SCRIPTS (ES Modules)                                     -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

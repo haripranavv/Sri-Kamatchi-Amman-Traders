@@ -1,0 +1,122 @@
+/* ============================================================
+   ANIMATIONS.CSS — GSAP & CSS Animation Utilities
+   Sri Kamatchi Amman Traders
+   ============================================================ */
+
+/* ── Scroll Reveal (elements start hidden, GSAP reveals them) ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.reveal--left {
+  opacity: 0;
+  transform: translateX(-40px);
+}
+
+.reveal--right {
+  opacity: 0;
+  transform: translateX(40px);
+}
+
+.reveal--scale {
+  opacity: 0;
+  transform: scale(0.92);
+}
+
+/* When GSAP is unavailable or animations are done, ensure visible */
+.reveal--visible {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+
+/* ── Floating animation (continuous, CSS-driven) ── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33% { transform: translateY(-8px) rotate(2deg); }
+  66% { transform: translateY(-4px) rotate(-1deg); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.animate-float-delay-1 {
+  animation-delay: 0.5s;
+}
+
+.animate-float-delay-2 {
+  animation-delay: 1.2s;
+}
+
+.animate-float-delay-3 {
+  animation-delay: 2s;
+}
+
+
+/* ── Pulse glow ── */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 0.25; transform: scale(1.05); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+
+/* ── Shimmer loading placeholder ── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-gray-100) 25%,
+    var(--color-gray-50) 50%,
+    var(--color-gray-100) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal--left,
+  .reveal--right,
+  .reveal--scale {
+    opacity: 1;
+    transform: none;
+  }
+
+  .animate-float,
+  .animate-float-slow,
+  .animate-pulse-glow,
+  .shimmer {
+    animation: none;
+  }
+
+  /* Disable all CSS transitions for users who prefer reduced motion */
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
