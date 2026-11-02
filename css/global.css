@@ -8,39 +8,46 @@
 
 /* ── Design Tokens (CSS Custom Properties) ── */
 :root {
-  /* Brand Colors */
-  --color-gold-primary:    #D4A843;
-  --color-gold-light:      #E8C96A;
-  --color-gold-dark:       #B08A2E;
-  --color-deep-olive:      #2D3A1E;
-  --color-warm-cream:      #FFF8E7;
-  --color-rich-amber:      #C67C3B;
-  --color-earth-brown:     #5C3D2E;
-  --color-leaf-green:      #4A7C3F;
+  /* Brand Colors — Heritage Temple Green & Royal Warm Gold */
+  --color-gold-primary:    #C89B3C;
+  --color-gold-light:      #E4BE64;
+  --color-gold-dark:       #9E7522;
+  --color-gold-glow:       rgba(200, 155, 60, 0.28);
+  --color-gold-surface:    #FCF9F0;
+
+  --color-deep-olive:      #113222; /* Rich Temple Green from Kamatchi Amman Badge */
+  --color-brand-primary:   #113222;
+  --color-brand-light:     #1B4E35;
+  --color-brand-dark:      #091F14;
+
+  --color-warm-cream:      #FAF7F0; /* Warm Alabaster Parchment */
+  --color-rich-amber:      #C9762B; /* Cold-pressed oil liquid amber */
+  --color-earth-brown:     #4A3222;
+  --color-leaf-green:      #2A6F3B;
 
   /* Neutral Colors */
   --color-white:           #FFFFFF;
-  --color-gray-50:         #FAFAF8;
-  --color-gray-100:        #F5F3EE;
-  --color-gray-200:        #E8E4DB;
-  --color-gray-300:        #D4CFC3;
-  --color-gray-400:        #A8A295;
-  --color-gray-500:        #78736A;
-  --color-gray-600:        #5A5650;
-  --color-gray-700:        #3D3A36;
-  --color-gray-800:        #2A2825;
-  --color-gray-900:        #1A1917;
+  --color-gray-50:         #FCFBF8;
+  --color-gray-100:        #F6F3EA;
+  --color-gray-200:        #E8E2D4;
+  --color-gray-300:        #D6CDC0;
+  --color-gray-400:        #A59B8B;
+  --color-gray-500:        #766D5E;
+  --color-gray-600:        #554D41;
+  --color-gray-700:        #3B352C;
+  --color-gray-800:        #25211B;
+  --color-gray-900:        #151310;
 
   /* Semantic Colors */
-  --color-success:         #4A7C3F;
-  --color-warning:         #D4A843;
-  --color-error:           #C4453C;
-  --color-info:            #4A7C9F;
+  --color-success:         #2A6F3B;
+  --color-warning:         #C89B3C;
+  --color-error:           #C43D32;
+  --color-info:            #2B6F8E;
 
   /* Surface Colors */
   --color-surface:         var(--color-warm-cream);
   --color-surface-elevated: var(--color-white);
-  --color-surface-overlay: rgba(0, 0, 0, 0.4);
+  --color-surface-overlay: rgba(9, 31, 20, 0.48);
 
   /* Text Colors */
   --color-text-primary:    var(--color-deep-olive);
@@ -88,20 +95,24 @@
   --radius-2xl:  1.5rem;    /* 24px */
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  --shadow-lg:   0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
-  --shadow-xl:   0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  /* Advanced Shadows with Ambient Tint */
+  --shadow-sm:   0 1px 3px rgba(17, 50, 34, 0.05);
+  --shadow-md:   0 4px 12px -2px rgba(17, 50, 34, 0.07), 0 2px 5px -2px rgba(200, 155, 60, 0.08);
+  --shadow-lg:   0 12px 26px -4px rgba(17, 50, 34, 0.09), 0 4px 10px -3px rgba(200, 155, 60, 0.12);
+  --shadow-xl:   0 22px 42px -6px rgba(17, 50, 34, 0.13), 0 8px 18px -4px rgba(200, 155, 60, 0.15);
+  --shadow-gold: 0 8px 24px -4px rgba(200, 155, 60, 0.35);
 
-  /* Transitions */
-  --transition-fast:   150ms ease;
-  --transition-base:   250ms ease;
-  --transition-slow:   400ms ease;
+  /* Advanced Spring & Decelerated Curves */
+  --ease-spring:       cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-bounce:       cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-soft:         cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-fast:   180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-base:   300ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow:   500ms cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Layout */
   --container-max:   1200px;
-  --nav-height:      72px;
+  --nav-height:      74px;
 
   /* Z-Index Scale */
   --z-base:      1;

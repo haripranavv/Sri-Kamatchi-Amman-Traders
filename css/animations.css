@@ -66,12 +66,54 @@
 
 /* ── Pulse glow ── */
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.15; transform: scale(1); }
-  50% { opacity: 0.25; transform: scale(1.05); }
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.38; transform: scale(1.08); }
 }
 
 .animate-pulse-glow {
-  animation: pulse-glow 4s ease-in-out infinite;
+  animation: pulse-glow 5s ease-in-out infinite;
+}
+
+/* ── Concentric Ring Rotations ── */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 35s linear infinite;
+}
+
+@keyframes spin-reverse-slow {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+.animate-spin-reverse-slow {
+  animation: spin-reverse-slow 45s linear infinite;
+}
+
+/* ── Aura Breathe Effect for Brand Badge ── */
+@keyframes aura-breathe {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 60px rgba(200, 155, 60, 0.3), inset 0 0 45px rgba(200, 155, 60, 0.2);
+  }
+  50% {
+    transform: scale(1.025);
+    box-shadow: 0 0 100px rgba(200, 155, 60, 0.55), inset 0 0 65px rgba(200, 155, 60, 0.35);
+  }
+}
+
+.animate-aura-breathe {
+  animation: aura-breathe 6s ease-in-out infinite;
+}
+
+/* ── Golden Gleam Shimmer ── */
+@keyframes gold-gleam {
+  0% { transform: translateX(-150%) rotate(25deg); opacity: 0; }
+  25% { opacity: 0.5; }
+  100% { transform: translateX(250%) rotate(25deg); opacity: 0; }
 }
 
 

@@ -26,7 +26,7 @@ export const SAMPLE_PRODUCTS = [
   {
     id: 'demo-sesame-1L',
     name: 'Cold Pressed Sesame Oil',
-    nameTamil: 'செக்கு நல்லெண்ணெய்',
+    nameTamil: 'மரச்செக்கு நல்லெண்ணெய்',
     category: 'sesame',
     imageURL: 'assets/images/products/sesame-oil.webp',
     price: 450,
@@ -36,74 +36,37 @@ export const SAMPLE_PRODUCTS = [
     variants: [
       { size: '500ml', sku: 'SES-500ML', price: 240, discountPrice: 210, stock: 40, isDefault: false },
       { size: '1L', sku: 'SES-1L', price: 450, discountPrice: 399, stock: 50, isDefault: true },
+      { size: '2L', sku: 'SES-2L', price: 880, discountPrice: 780, stock: 25, isDefault: false },
       { size: '5L', sku: 'SES-5L', price: 2100, discountPrice: 1899, stock: 15, isDefault: false }
     ],
     emoji: '🫒',
-    tags: ['organic', 'cold-pressed'],
-    rating: 4.5,
-    reviewCount: 23,
-    description: 'Traditional stone-ground sesame oil with a rich aroma.',
-    isSample: true
-  },
-  {
-    id: 'demo-coconut-1L',
-    name: 'Virgin Coconut Oil',
-    nameTamil: 'செக்கு தேங்காய் எண்ணெய்',
-    category: 'coconut',
-    imageURL: 'assets/images/products/coconut-oil.webp',
-    price: 380,
-    discountPrice: 349,
-    unit: '1L',
-    sizes: ['500ml', '1L', '2L'],
-    variants: [
-      { size: '500ml', sku: 'COC-500ML', price: 200, discountPrice: 180, stock: 35, isDefault: false },
-      { size: '1L', sku: 'COC-1L', price: 380, discountPrice: 349, stock: 40, isDefault: true }
-    ],
-    emoji: '🥥',
-    tags: ['organic', 'cold-pressed'],
-    rating: 4.7,
-    reviewCount: 41,
-    description: 'Pure cold-pressed coconut oil for cooking and wellness.',
+    tags: ['organic', 'cold-pressed', 'wood-pressed'],
+    rating: 4.8,
+    reviewCount: 48,
+    description: 'Traditional wood-pressed (Mara Chekku) sesame oil extracted with natural palm jaggery. Unfiltered, rich in natural antioxidants and authentic aroma.',
     isSample: true
   },
   {
     id: 'demo-groundnut-1L',
-    name: 'Groundnut Oil',
-    nameTamil: 'செக்கு கடலை எண்ணெய்',
+    name: 'Cold Pressed Groundnut Oil',
+    nameTamil: 'மரச்செக்கு கடலை எண்ணெய்',
     category: 'groundnut',
     imageURL: 'assets/images/products/groundnut-oil.webp',
     price: 320,
     discountPrice: 289,
     unit: '1L',
-    sizes: ['500ml', '1L', '5L'],
+    sizes: ['500ml', '1L', '2L', '5L'],
     variants: [
-      { size: '1L', sku: 'GRO-1L', price: 320, discountPrice: 289, stock: 60, isDefault: true }
+      { size: '500ml', sku: 'GRO-500ML', price: 175, discountPrice: 155, stock: 45, isDefault: false },
+      { size: '1L', sku: 'GRO-1L', price: 320, discountPrice: 289, stock: 60, isDefault: true },
+      { size: '2L', sku: 'GRO-2L', price: 625, discountPrice: 565, stock: 30, isDefault: false },
+      { size: '5L', sku: 'GRO-5L', price: 1550, discountPrice: 1399, stock: 20, isDefault: false }
     ],
     emoji: '🥜',
-    tags: ['cold-pressed'],
-    rating: 4.3,
-    reviewCount: 18,
-    description: 'Light and nutty groundnut oil for everyday cooking.',
-    isSample: true
-  },
-  {
-    id: 'demo-gingelly-500ml',
-    name: 'Gingelly Oil',
-    nameTamil: 'நல்லெண்ணெய்',
-    category: 'gingelly',
-    imageURL: 'assets/images/products/gingelly-oil.webp',
-    price: 280,
-    discountPrice: null,
-    unit: '500ml',
-    sizes: ['200ml', '500ml', '1L'],
-    variants: [
-      { size: '500ml', sku: 'GIN-500ML', price: 280, discountPrice: null, stock: 30, isDefault: true }
-    ],
-    emoji: '✨',
-    tags: ['traditional'],
-    rating: 4.6,
-    reviewCount: 35,
-    description: 'Premium gingelly oil used in Tamil Nadu kitchens for generations.',
+    tags: ['cold-pressed', 'wood-pressed'],
+    rating: 4.7,
+    reviewCount: 38,
+    description: 'Single-origin Tamil Nadu groundnuts cold-pressed at low temperatures. Retains natural Vitamin E, heart-friendly fats, and unmatched nutty flavor.',
     isSample: true
   },
   {
@@ -117,19 +80,21 @@ export const SAMPLE_PRODUCTS = [
     unit: '1L',
     sizes: ['500ml', '1L', '2L'],
     variants: [
-      { size: '1L', sku: 'MUS-1L', price: 290, discountPrice: 259, stock: 25, isDefault: true }
+      { size: '500ml', sku: 'MUS-500ML', price: 160, discountPrice: 139, stock: 35, isDefault: false },
+      { size: '1L', sku: 'MUS-1L', price: 290, discountPrice: 259, stock: 40, isDefault: true },
+      { size: '2L', sku: 'MUS-2L', price: 560, discountPrice: 499, stock: 20, isDefault: false }
     ],
     emoji: '🌿',
-    tags: ['cold-pressed'],
-    rating: 4.2,
-    reviewCount: 12,
-    description: 'Pungent and flavourful mustard oil for pickles and cooking.',
+    tags: ['cold-pressed', 'pungent'],
+    rating: 4.6,
+    reviewCount: 24,
+    description: 'Freshly expelled from select dark mustard seeds. Robust pungent aroma and therapeutic properties, ideal for traditional pickles, gravies, and marinades.',
     isSample: true
   },
   {
     id: 'demo-sunflower-2L',
-    name: 'Sunflower Oil',
-    nameTamil: 'சூரியகாந்தி எண்ணெய்',
+    name: 'Pure Sunflower Oil',
+    nameTamil: 'தூய சூரியகாந்தி எண்ணெய்',
     category: 'sunflower',
     imageURL: 'assets/images/products/sunflower-oil.webp',
     price: 420,
@@ -137,13 +102,60 @@ export const SAMPLE_PRODUCTS = [
     unit: '2L',
     sizes: ['1L', '2L', '5L'],
     variants: [
-      { size: '2L', sku: 'SUN-2L', price: 420, discountPrice: 379, stock: 30, isDefault: true }
+      { size: '1L', sku: 'SUN-1L', price: 220, discountPrice: 199, stock: 45, isDefault: false },
+      { size: '2L', sku: 'SUN-2L', price: 420, discountPrice: 379, stock: 35, isDefault: true },
+      { size: '5L', sku: 'SUN-5L', price: 1020, discountPrice: 929, stock: 18, isDefault: false }
     ],
     emoji: '🌻',
-    tags: ['light', 'everyday'],
-    rating: 4.1,
-    reviewCount: 9,
-    description: 'Light and healthy sunflower oil for heart-conscious cooking.',
+    tags: ['light', 'everyday', 'heart-healthy'],
+    rating: 4.5,
+    reviewCount: 29,
+    description: 'Crystal-clear, light golden oil pressed from prime sunflower seeds. High smoke point and low absorption for crisp frying and guilt-free daily cooking.',
+    isSample: true
+  },
+  {
+    id: 'demo-coconut-1L',
+    name: 'Virgin Coconut Oil',
+    nameTamil: 'மரச்செக்கு தேங்காய் எண்ணெய்',
+    category: 'coconut',
+    imageURL: 'assets/images/products/coconut-oil.webp',
+    price: 380,
+    discountPrice: 349,
+    unit: '1L',
+    sizes: ['500ml', '1L', '2L', '5L'],
+    variants: [
+      { size: '500ml', sku: 'COC-500ML', price: 200, discountPrice: 180, stock: 35, isDefault: false },
+      { size: '1L', sku: 'COC-1L', price: 380, discountPrice: 349, stock: 40, isDefault: true },
+      { size: '2L', sku: 'COC-2L', price: 740, discountPrice: 679, stock: 20, isDefault: false },
+      { size: '5L', sku: 'COC-5L', price: 1800, discountPrice: 1650, stock: 12, isDefault: false }
+    ],
+    emoji: '🥥',
+    tags: ['organic', 'cold-pressed', 'pure'],
+    rating: 4.9,
+    reviewCount: 52,
+    description: 'Extracted from sulfur-free sun-dried Tamil Nadu coconut copra. 100% pure without chemical bleaching or artificial scents for cooking and hair care.',
+    isSample: true
+  },
+  {
+    id: 'demo-gingelly-500ml',
+    name: 'Traditional Gingelly Oil',
+    nameTamil: 'நாட்டு நல்லெண்ணெய்',
+    category: 'gingelly',
+    imageURL: 'assets/images/products/gingelly-oil.webp',
+    price: 280,
+    discountPrice: 249,
+    unit: '500ml',
+    sizes: ['500ml', '1L', '2L'],
+    variants: [
+      { size: '500ml', sku: 'GIN-500ML', price: 280, discountPrice: 249, stock: 35, isDefault: true },
+      { size: '1L', sku: 'GIN-1L', price: 520, discountPrice: 479, stock: 30, isDefault: false },
+      { size: '2L', sku: 'GIN-2L', price: 1010, discountPrice: 939, stock: 15, isDefault: false }
+    ],
+    emoji: '✨',
+    tags: ['traditional', 'heritage'],
+    rating: 4.8,
+    reviewCount: 37,
+    description: 'Artisanal cold-pressed gingelly oil prepared with heritage Chekku techniques. An indispensable staple for South Indian cooking and rasam tempering.',
     isSample: true
   }
 ];
